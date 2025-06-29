@@ -1,685 +1,923 @@
-<!DOCTYPE HTML>
-<html>
+<!DOCTYPE html>
+<html lang="tr">
 <head>
-	
-	<title>Our Love Story</title>
-	<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-	<link rel="stylesheet" href="css/default.css">
-	<style type="text/css">
-		@font-face {
-			font-family: digit;
-			src: url('digital.ttf') format("truetype");
-		}
-		@import url('https://fonts.googleapis.com/css?family=Dosis:800|Lobster|Pacifico');
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bizim Hikayemiz</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Montserrat:wght@400;700&family=Source+Code+Pro&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- TEMEL STİLLER --- */
+        :root {
+            --bg-color: #FFF8F9;
+            --primary-color: #E6AAB7;
+            --secondary-color: #D988A0;
+            --text-color: #4A4A4A;
+            --accent-color: #D4AF37;
+            --comment-color: #9E9E9E;
+            --string-color: #C78283;
+            --dark-bg: #1a0208;
+            --particle-color: rgba(230, 170, 183, 0.5);
+            --star-bg: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
+        }
 
-    body {
-      width: 100%;
-      height: 100%;
-      margin: 0;
-      padding: 0;
-    }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            transition: background-color 1s ease;
+        }
+
+        /* --- BUTON STİLLERİ --- */
+        .button {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: bold;
+            font-size: 1.2em;
+            color: white;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            padding: 18px 36px;
+            border-radius: 50px;
+            border: none;
+            box-shadow: 0 4px 15px rgba(217, 136, 160, 0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 100;
+        }
+
+        .button:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(217, 136, 160, 0.3);
+        }
+
+        /* --- EKRANLAR --- */
+        .screen {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: none; /* Ekranlar varsayılan olarak gizli */
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .screen.active {
+            display: flex; /* Sadece aktif ekran görünür */
+        }
+
+        /* --- PARÇACIK ANİMASYONU --- */
+        #particle-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+        }
+        .particle {
+            position: absolute;
+            background-color: var(--particle-color);
+            border-radius: 50%;
+            animation: float 25s infinite ease-in-out;
+        }
+        @keyframes float {
+            0% { transform: translateY(0) translateX(0); }
+            50% { transform: translateY(-100vh) translateX(50px); }
+            100% { transform: translateY(0) translateX(0); opacity: 0; }
+        }
 
 
+        /* --- KOD YAZMA EKRANI --- */
+        #code-container {
+            width: 90%;
+            max-width: 700px;
+            height: auto;
+            max-height: 60vh;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            font-family: 'Source Code Pro', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.7;
+            overflow-y: auto;
+            border: 1px solid #f0e2e5;
+        }
+        
+        .code-line { white-space: pre-wrap; }
+        .comment { color: var(--comment-color); font-style: italic;}
+        .keyword { color: var(--secondary-color); font-weight: bold; }
+        .variable { color: var(--text-color); }
+        .string { color: var(--string-color); }
+        .function { color: var(--primary-color); }
+        .class-name { color: var(--accent-color); font-weight: bold;}
 
-    .o_heart {
-      fill: #FFB3C3;
-    }
+        #next-step-button {
+            margin-top: 25px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease 0.5s, transform 0.5s ease 0.5s;
+        }
 
-    .i_heart {
-      fill: #FCE3E9;
-    }
+        #next-step-button.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* --- YENİ SÜRPRİZ EKRANI: ANILAR --- */
+        #memory-screen {
+            background: var(--star-bg);
+            color: #fff;
+            overflow: hidden;
+            justify-content: flex-start;
+        }
+        #memory-title {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 400;
+            letter-spacing: 1.5px;
+            font-size: clamp(1.5rem, 5vw, 2.2rem);
+            color: #fff;
+            text-shadow: 0 0 15px var(--primary-color);
+            margin-top: 8vh;
+            margin-bottom: auto;
+            z-index: 10;
+        }
+        #constellation-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+        .constellation {
+            position: absolute;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: opacity 1s ease, transform 1s ease;
+            cursor: pointer;
+            z-index: 2;
+            animation: float-constellation 8s infinite ease-in-out;
+        }
+        @keyframes float-constellation {
+            0% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-10px) scale(1.05); }
+            100% { transform: translateY(0px) scale(1); }
+        }
+        .constellation.visible {
+             opacity: 1;
+            transform: scale(1);
+        }
+        .constellation .star {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background-color: white;
+            border-radius: 50%;
+            box-shadow: 0 0 12px white, 0 0 24px white;
+            animation: twinkle 2s infinite ease-in-out;
+        }
+        @keyframes twinkle {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 12px white, 0 0 24px white; }
+            50% { transform: scale(0.8); box-shadow: 0 0 6px white, 0 0 12px white;}
+        }
 
-    .text {
-      z-index: 1000;
-      position: absolute;
-      font-size: 3.5em;
-      letter-spacing: 3px;
-      font-family: 'Dosis';
-      font-weight: bold;
-      left: 50%;
-      top: 50%;
-      transform: translate(-50%, -50%);
-      color: #FFB3C3;
-      background: white;
-      padding: 10px 20px;
-      border-radius: 5px;
-      border: 3px solid #FCE3E9;
-      box-shadow: 0 5px 6px rgba(0, 0, 0, 0.1);
-      white-space: nowrap;
-    }
-	.tye {
-      z-index: 1000;
-      position: absolute;
-      font-size: 3.5em;
-      letter-spacing: 3px;
-      font-family: 'Dosis';
-      font-weight: bold;
-      left: 50%;
-      top: 10%;
-      transform: translate(-50%, -50%);
-      color: #FFB3C3;
-      background: white;
-      padding: 10px 20px;
-      border-radius: 5px;
-      border: 3px solid #FCE3E9;
-      box-shadow: 0 5px 6px rgba(0, 0, 0, 0.1);
-      white-space: nowrap;
-    }
-    .arrow_container {
-      width: 100%;
-      height: 100px;
-      position: fixed;
-      border: 1px solid black;
-      z-index: 1000;
-      bottom: 15px;
-      left: 0px;
-    }
-	
-	</style>
-	
-	<link href="css/default.css" type="text/css" rel="stylesheet">
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
-	<script type="text/javascript" src="js/garden.js"></script>
-	<script type="text/javascript" src="js/functions.js"></script>
-	<script src="https://d3js.org/d3.v5.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/88/three.min.js"></script>
-	<script id="vertexShader" type="x-shader/x-vertex">
-		void main() {
-			gl_Position = vec4( position, 1.0 );
-		}
-	</script>
-	
-	
-	<span class="text">Tıkla</span>
-	
+        .constellation .memory-popup {
+            position: absolute;
+            bottom: 120%;
+            left: 50%;
+            transform: translateX(-50%) scale(0.8);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.4s, visibility 0.4s, transform 0.4s;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            width: 170px;
+            z-index: 30;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .constellation:hover .memory-popup {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) scale(1);
+        }
+        
+        .constellation.hovered {
+            z-index: 100;
+        }
+
+        .constellation .memory-image {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            display: block;
+            border: 5px solid white;
+        }
+        
+        .constellation .memory-text {
+            margin-top: 8px;
+            text-align: center;
+            color: #333;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.9rem;
+            font-weight: bold;
+            line-height: 1.3;
+            width: 100%; 
+            word-wrap: break-word;
+        }
+        
+        .shooting-star {
+            position: absolute;
+            height: 2px;
+            background: linear-gradient(-45deg, rgba(255,255,255,1), rgba(255,255,255,0));
+            border-radius: 999px;
+            filter: drop-shadow(0 0 6px white);
+            animation: tail 3s ease-in-out infinite, shooting 3s ease-in-out infinite;
+        }
+        @keyframes tail {
+            0% { width: 0; }
+            30% { width: 100px; }
+            100% { width: 0; }
+        }
+        @keyframes shooting {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(300px); }
+        }
+        
+        #final-step-button {
+            opacity: 0;
+            transition: opacity 1s ease 1s;
+            position: absolute;
+            bottom: 8vh;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+        }
+         #final-step-button.visible {
+            opacity: 1;
+        }
+
+        /* --- YÜKLEME ANİMASYONU --- */
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* --- KALP BAHÇESİ EKRANI --- */
+        #garden-screen { background-color: var(--dark-bg); }
+        #garden-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        #final-message {
+            z-index: 10;
+            text-align: center;
+            color: white;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: opacity 1.5s ease, transform 1.5s ease;
+        }
+        #final-message.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+        #final-message h1 {
+            font-family: 'Great Vibes', cursive;
+            font-size: clamp(2.5rem, 10vw, 6rem);
+            font-weight: normal;
+            text-shadow: 0 0 10px #fff, 0 0 20px var(--primary-color), 0 0 30px var(--primary-color), 0 0 40px var(--primary-color);
+        }
+        #final-message p { font-size: clamp(1rem, 4vw, 1.5rem); margin-top: 10px; }
+        #elapseClock { margin-top: 20px; font-size: 1.2rem; letter-spacing: 2px; }
+        .digit { font-weight: bold; color: var(--primary-color); }
+
+        /* --- MODAL PENCERE --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .modal-overlay.visible {
+            display: flex;
+            opacity: 1;
+        }
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.visible .modal-content {
+            transform: scale(1);
+        }
+        .modal-close {
+            position: absolute;
+            top: 10px; right: 15px;
+            background: none; border: none;
+            font-size: 2rem;
+            color: #aaa;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .modal-close:hover {
+            color: #333;
+        }
+        #modal-text {
+            white-space: pre-wrap;
+            line-height: 1.6;
+            text-align: center;
+        }
+
+        /* --- MOBİL UYUMLULUK (YENİ EKLENDİ) --- */
+        @media (max-width: 768px) {
+            /* Butonları küçült */
+            .button {
+                font-size: 1em;
+                padding: 14px 28px;
+            }
+
+            /* Kod yazma alanını ayarla */
+            #code-container {
+                font-size: 11px; /* Mobil için daha okunaklı */
+                max-height: 70vh; /* Yüksekliği artır */
+                padding: 15px;
+            }
+            #next-step-button {
+                margin-top: 15px;
+            }
+
+            /* Anılar ekranı başlığını ayarla */
+            #memory-title {
+                margin-top: 12vh;
+                text-align: center; /* Ortala */
+                padding: 0 10px; /* Kenarlara yapışmasın */
+            }
+
+            /* Anı pencerelerinin mobil ekrana sığmasını sağla */
+            .constellation .memory-popup {
+                width: 150px; /* Genişliği biraz küçült */
+            }
+            .constellation .memory-image {
+                width: 130px; /* Resmi küçült */
+                height: 130px;
+            }
+
+            /* Final mesajı fontlarını ayarla */
+            #final-message h1 {
+                font-size: clamp(2.5rem, 15vw, 6rem); /* Mobilde daha belirgin */
+            }
+            #final-message p {
+                font-size: clamp(1rem, 5vw, 1.5rem);
+            }
+            #elapseClock {
+                font-size: 1rem;
+                letter-spacing: 1px;
+                line-height: 1.4; /* Satır kaymasını engelle */
+            }
+            
+            /* Modal pencereyi ayarla */
+            .modal-content {
+                padding: 20px;
+            }
+        }
+
+    </style>
 </head>
+<body>
+
+    <div id="start-screen" class="screen active">
+        <div id="particle-container"></div>
+        <button id="start-button" class="button">Hikayemizi Başlat</button>
+    </div>
+
+    <div id="code-screen" class="screen">
+        <div id="code-container"></div>
+        <button id="next-step-button" class="button">Bir Sürpriz Daha Var</button>
+    </div>
+    
+    <div id="memory-screen" class="screen">
+        <div id="shooting-stars-container"></div>
+        <h2 id="memory-title">Anılarımızın Yıldız Haritası</h2>
+        <div id="constellation-container"></div>
+        <button id="final-step-button" class="button">Ve İşte Final...</button>
+    </div>
+
+    <div id="garden-screen" class="screen">
+        <canvas id="garden-canvas"></canvas>
+        <div id="final-message">
+            <h1>Seni Seviyorum</h1>
+            <p>Sapsarı saçlarından...</p>
+            <p id="final-name">- Safer'den Alaska'sına -</p>
+            <div id="elapseClock"></div>
+            <button id="future-dream-button" class="button gemini-button" style="display: none; margin-top: 20px;">✨ Geleceğimizi Hayal Et</button>
+        </div>
+    </div>
+
+    <div id="gemini-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button id="modal-close-button" class="modal-close">×</button>
+            <div class="loader" style="display: none;"></div>
+            <div id="modal-text"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- ELEMENTLER ---
+            const startButton = document.getElementById('start-button');
+            const nextStepButton = document.getElementById('next-step-button');
+            const finalStepButton = document.getElementById('final-step-button');
+            
+            const startScreen = document.getElementById('start-screen');
+            const codeScreen = document.getElementById('code-screen');
+            const memoryScreen = document.getElementById('memory-screen');
+            const gardenScreen = document.getElementById('garden-screen');
+
+            const futureDreamBtn = document.getElementById('future-dream-button');
+            const modal = document.getElementById('gemini-modal');
+            const modalCloseBtn = document.getElementById('modal-close-button');
+            const modalText = document.getElementById('modal-text');
+            const modalLoader = document.querySelector('#gemini-modal .loader');
+            
+            let backgroundAudio; // Arka plan müziği için tek bir değişken
+
+            // --- Hikaye Verileri ---
+            const storyData = {
+                partner1: "Alaska",
+                partner2: "Safer",
+                meetDate: "2019-11-04T15:00:00"
+            };
+            
+            document.getElementById('final-name').textContent = `- ${storyData.partner2}'den ${storyData.partner1}'sına -`;
+
+            // --- API Fonksiyonu ---
+            async function callGeminiAPI(prompt) {
+                const apiKey = ""; 
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
+                
+                const payload = {
+                    contents: [{ role: "user", parts: [{ text: prompt }] }],
+                    safetySettings: [
+                        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+                    ]
+                };
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) throw new Error(`API Hatası: ${response.status}`);
+                    const result = await response.json();
+                    
+                    if (result.candidates && result.candidates[0].content.parts[0].text) {
+                        return result.candidates[0].content.parts[0].text;
+                    } else {
+                        return "Üzgünüm, bir şeyler ters gitti ve anlamlı bir cevap alamadım.";
+                    }
+                } catch (error) {
+                    console.error("Gemini API çağrısı başarısız:", error);
+                    return "İstek gönderilirken bir hata oluştu.";
+                }
+            }
+            
+            // --- Parçacık Oluşturma ---
+            function createParticles() {
+                const container = document.getElementById('particle-container');
+                if (!container) return;
+                for (let i = 0; i < 50; i++) {
+                    const particle = document.createElement('div');
+                    particle.classList.add('particle');
+                    const size = Math.random() * 10 + 5;
+                    particle.style.width = `${size}px`;
+                    particle.style.height = `${size}px`;
+                    particle.style.left = `${Math.random() * 100}%`;
+                    particle.style.bottom = `-${size}px`;
+                    particle.style.animationDelay = `${Math.random() * 25}s`;
+                    particle.style.animationDuration = `${Math.random() * 15 + 10}s`;
+                    container.appendChild(particle);
+                }
+            }
+            createParticles();
 
 
+            // --- EKRAN GEÇİŞ FONKSİYONU ---
+            function switchScreen(from, to) {
+                from.classList.remove('active');
+                to.classList.add('active');
+            }
 
-<body onclick="music_play()">
-	<script id="fragmentShader" type="x-shader/x-fragment">
-		uniform vec2 u_resolution;
-		uniform float u_time;
-		uniform vec2 u_mouse;
-	  
-		const int octaves = 2;
-		const float seed = 43758.5453123;
-		const float seed2 = 73156.8473192;
-		// Epsilon value
-		const float eps = 0.005;
-	  
-		const vec3 ambientLight = 0.99 * vec3(1.0, 1.0, 1.0);
-		const vec3 light1Pos = vec3(10., 5.0, -25.0);
-		const vec3 light1Intensity = vec3(0.35);
-		const vec3 light2Pos = vec3(-20., -25.0, 85.0);
-		const vec3 light2Intensity = vec3(0.2);
-	  
-		// movement variables
-		vec3 movement = vec3(.0);
-	
-		// Gloable variables for the raymarching algorithm.
-		const int maxIterations = 256;
-		const int maxIterationsShad = 16;
-		const float stepScale = .7;
-		const float stopThreshold = 0.001;
-	  
-	  
-	  mat4 rotationMatrix(vec3 axis, float angle)
-	  {
-		  axis = normalize(axis);
-		  float s = sin(angle);
-		  float c = cos(angle);
-		  float oc = 1.0 - c;
-	
-		  return mat4(oc * axis.x * axis.x + c,           oc * axis.x * axis.y - axis.z * s,  oc * axis.z * axis.x + axis.y * s,  0.0,
-					  oc * axis.x * axis.y + axis.z * s,  oc * axis.y * axis.y + c,           oc * axis.y * axis.z - axis.x * s,  0.0,
-					  oc * axis.z * axis.x - axis.y * s,  oc * axis.y * axis.z + axis.x * s,  oc * axis.z * axis.z + c,           0.0,
-					  0.0,                                0.0,                                0.0,                                1.0);
-	  }
-	  
-	  
-	  float length2( vec2 p )
-	  {
-		return sqrt( p.x*p.x + p.y*p.y );
-	  }
-	
-	  float length6( vec2 p )
-	  {
-		p = p*p*p; p = p*p;
-		return pow( p.x + p.y, 1.0/6.0 );
-	  }
-	
-	  float length8( vec2 p )
-	  {
-		p = p*p; p = p*p; p = p*p;
-		return pow( p.x + p.y, 1.0/8.0 );
-	  }
-	  
-	  // Distance function primitives
-	  // Reference: http://iquilezles.org/www/articles/distfunctions/distfunctions.htm
-	  float sdBox( vec3 p, vec3 b )
-	  {
-		vec3 d = abs(p) - b;
-		return min(max(d.x,max(d.y,d.z)),0.0) + length(max(d,0.0));
-	  }
-	  float udBox( vec3 p, vec3 b )
-	  {
-		return length(max(abs(p)-b,0.0));
-	  }
-	  float udRoundBox( vec3 p, vec3 b, float r )
-	  {
-		return length(max(abs(p)-b,0.0))-r;
-	  }
-	  float sdSphere( vec3 p, float s )
-	  {
-		return length(p)-s;
-	  }
-	  float sdCylinder( vec3 p, vec3 c )
-	  {
-		return length(p.xz-c.xy)-c.z;
-	  }
-	  float sdCappedCylinder( vec3 p, vec2 h )
-	  {
-		vec2 d = abs(vec2(length(p.xz),p.y)) - h;
-		return min(max(d.x,d.y),0.0) + length(max(d,0.0));
-	  }
-	  float sdTorus82( vec3 p, vec2 t )
-	  {
-		vec2 q = vec2(length2(p.xz)-t.x,p.y);
-		return length8(q)-t.y;
-	  }
-	  float sdPlane( vec3 p)
-	  {
-		return p.y;
-	  }
-	  
-	  // smooth min
-	  // reference: http://iquilezles.org/www/articles/smin/smin.htm
-	  float smin(float a, float b, float k) {
-		  float res = exp(-k*a) + exp(-k*b);
-		  return -log(res)/k;
-	  }
-	  
-	  vec3 random3( vec3 p ) {
-		  return fract(sin(vec3(dot(p,vec3(127.1,311.7,319.8)),dot(p,vec3(269.5,183.3, 415.2)),dot(p,vec3(362.9,201.5,134.7))))*43758.5453);
-	  }
-	  vec2 random2( vec2 p ) {
-		  return fract(sin(vec2(dot(p,vec2(127.1,311.7)),dot(p,vec2(269.5,183.3))))*43758.5453);
-	  }
-	  
-	  // The world!
-	  float world_sdf(in vec3 p) {
-		float world = 10.;
-		
-		vec3 grid = floor(p);
-		vec2 rand = random2(grid.xy);
-		// if(mod(grid.x + grid.y, 2.) == 0.) {
-		//   return 1.;
-		// }
-		p.z += u_time * rand.x;
-		
-		float time = u_time + 20.*random2(floor(p.xz)).x;
-		
-		p = mod(p, 1.0) - .5;
-		
-		p.y = p.y - abs(p.x) * (2. - abs(p.x))  / 3.;
-		
-		world = sdSphere(p, .3 + -abs(sin(time + cos(time))) * .1);
-		// world = smin(world, world, 1.5);
-		
-		return world;
-	  }
-	  
-	  // Fuck yeah, normals!
-	  vec3 calculate_normal(in vec3 p)
-	  {
-		const vec3 small_step = vec3(0.0001, 0.0, 0.0);
-		
-		float gradient_x = world_sdf(vec3(p.x + eps, p.y, p.z)) - world_sdf(vec3(p.x - eps, p.y, p.z));
-		float gradient_y = world_sdf(vec3(p.x, p.y + eps, p.z)) - world_sdf(vec3(p.x, p.y - eps, p.z));
-		float gradient_z = world_sdf(vec3(p.x, p.y, p.z  + eps)) - world_sdf(vec3(p.x, p.y, p.z - eps));
-		
-		vec3 normal = vec3(gradient_x, gradient_y, gradient_z);
-	
-		return normalize(normal);
-	  }
-	
-	  // Raymarching.
-	  float rayMarching( vec3 origin, vec3 dir, float start, float end, inout float field ) {
-		
-		float sceneDist = 1e4;
-		float rayDepth = start;
-		for ( int i = 0; i < maxIterations; i++ ) {
-		  sceneDist = world_sdf( origin + dir * rayDepth ); // Distance from the point along the ray to the nearest surface point in the scene.
-	
-		  if (( sceneDist < stopThreshold ) || (rayDepth >= end)) {        
-			break;
-		  }
-		  // We haven't hit anything, so increase the depth by a scaled factor of the minimum scene distance.
-		  rayDepth += sceneDist * stepScale;
-		}
-	  
-		if ( sceneDist >= stopThreshold ) rayDepth = end;
-		else rayDepth += sceneDist;
-		  
-		// We've used up our maximum iterations. Return the maximum distance.
-		return rayDepth;
-	  }
-	  
-	
-	  // Shadows
-	  // Reference at: http://www.iquilezles.org/www/articles/rmshadows/rmshadows.htm
-	  float softShadow(vec3 ro, vec3 lightPos, float start, float k){
-		
-		  vec3 rd = lightPos - ro;
-		  float end = length(rd);
-	
-		  float shade = 1.0;
-	
-		  float dist = start;
-		  float stepDist = start;
-	
-		  for (int i=0; i<maxIterationsShad; i++){
-			  float h = world_sdf(ro + rd*dist);
-			  shade = min(shade, k*h/dist);
-			  
-			  dist += min(h, stepDist*2.); // The best of both worlds... I think. 
-			  
-			  if (h<0.001 || dist > end) break; 
-		  }
-	
-		  return min(max(shade, 0.) + 0.3, 1.0); 
-	  }
-	
-	  // Based on original by IQ - optimized to remove a divide
-	  float calculateAO(vec3 p, vec3 n)
-	  {
-		 const float AO_SAMPLES = 5.0;
-		 float r = 0.0;
-		 float w = 1.0;
-		 for (float i=1.0; i<=AO_SAMPLES; i++)
-		 {
-			float d0 = i * 0.15; // 1.0/AO_SAMPLES
-			r += w * (d0 - world_sdf(p + n * d0));
-			w *= 0.5;
-		 }
-		 return 1.0-clamp(r,0.0,1.0);
-	  }
-	  
-	  /**
-	   * Lighting
-	   * This stuff is way way better than the model I was using.
-	   * Courtesy Shane Warne
-	   * Reference: http://raymarching.com/
-	   * -------------------------------------
-	   * */
-	  
-	  // Lighting.
-	  vec3 lighting( vec3 sp, vec3 camPos, int reflectionPass, float dist, float field, vec3 rd) {
-		
-		// Start with black.
-		vec3 sceneColor = vec3(0.0);
-	
-		vec3 grid = floor(sp);
-		vec2 rand = random2(grid.xy);
-		vec3 voxPos = mod((sp + vec3(0., 0., u_time * rand.x)) * 0.25, 1.0);
-		vec3 objColor = vec3(1.0, .5, .5);
-		objColor.y *= voxPos.z*0.8;
-		objColor.z *= voxPos.x*0.8;
-	
-		// Obtain the surface normal at the scene position "sp."
-		vec3 surfNormal = calculate_normal(sp);
-	
-		// Lighting.
-	
-		// lp - Light position. Keeping it in the vacinity of the camera, but away from the objects in the scene.
-		vec3 lp = vec3(0., 0.0, -1.0) + movement;
-		// ld - Light direction.
-		vec3 ld = lp-sp;
-		// lcolor - Light color.
-		vec3 lcolor = vec3(1.,0.97,0.92) * .8;
-		
-		 // Light falloff (attenuation).
-		float len = length( ld ); // Distance from the light to the surface point.
-		ld /= len; // Normalizing the light-to-surface, aka light-direction, vector.
-		// float lightAtten = min( 1.0 / ( 0.15*len*len ), 1.0 ); // Removed light attenuation for this because I want the fade to white
-		
-		float sceneLen = length(camPos - sp); // Distance of the camera to the surface point
-		float sceneAtten = min( 1.0 / ( 0.015*sceneLen*sceneLen ), 1.0 ); // Keeps things between 0 and 1.   
-	
-		// Obtain the reflected vector at the scene position "sp."
-		vec3 ref = reflect(-ld, surfNormal);
-		
-		float ao = 1.0; // Ambient occlusion.
-		// ao = calculateAO(sp, surfNormal); // Ambient occlusion.
-	
-		float ambient = .5; //The object's ambient property.
-		float specularPower = 200.; // The power of the specularity. Higher numbers can give the object a harder, shinier look.
-		float diffuse = max( 0.0, dot(surfNormal, ld) ); //The object's diffuse value.
-		float specular = max( 0.0, dot( ref, normalize(camPos-sp)) ); //The object's specular value.
-		specular = pow(specular, specularPower); // Ramping up the specular value to the specular power for a bit of shininess.
-			
-		// Bringing all the lighting components togethr to color the screen pixel.
-		sceneColor += (objColor*(diffuse*0.8+ambient)+specular*0.5)*lcolor*1.3;
-		sceneColor = mix(sceneColor, vec3(1.), 1.-sceneAtten*sceneAtten); // fog
-		
-		// float shadow = softShadow(sp, lp, .1, 1.);
-		// sceneColor *= shadow + .8;
-		
-		return sceneColor;
-	
-	  }
-	
-		void main() {
-		  
-		  // Setting up our screen coordinates.
-		  vec2 aspect = vec2(u_resolution.x/u_resolution.y, 1.0); //
-		  vec2 uv = (2.0*gl_FragCoord.xy/u_resolution.xy - 1.0)*aspect;
-		  
-		  // This just gives us a touch of fisheye
-		  // uv *= 1. + dot(uv, uv) * 0.4;
-		  
-		  // movement
-		  movement = vec3(u_time / 5., 0., u_time / 1.);
-		  movement = vec3(0., 0., u_time / 6.);
-		  movement.x = cos(u_time / 8.) * 4.;
-		  movement.y = sin(u_time / 8.) * 4.;
-		  
-		  // The sin in here is to make it look like a walk.
-		  vec3 lookAt = vec3(-0., 0.2, 1.);  // This is the point you look towards, or at, if you prefer.
-		  vec3 camera_position = vec3(clamp(0.5 - u_mouse.x / u_resolution.x, -.5, .5), 0.15 + u_mouse.y / u_resolution.y - .5, -1.0); // This is the point you look from, or camera you look at the scene through. Whichever way you wish to look at it.
-		  
-		  lookAt += movement;
-		  // lookAt.z += sin(u_time / 10.) * .5;
-		  // lookAt.x += cos(u_time / 10.) * .5;
-		  camera_position += movement;
-		  
-		  vec3 forward = normalize(lookAt-camera_position); // Forward vector.
-		  vec3 right = normalize(vec3(forward.z, 0., -forward.x )); // Right vector... or is it left? Either way, so long as the correct-facing up-vector is produced.
-		  vec3 up = normalize(cross(forward,right)); // Cross product the two vectors above to get the up vector.
-	
-		  // FOV - Field of view.
-		  float FOV = 0.4;
-	
-		  // ro - Ray origin.
-		  vec3 ro = camera_position; 
-		  // rd - Ray direction.
-		  vec3 rd = normalize(forward + FOV*uv.x*right + FOV*uv.y*up);
-		  
-		  // Ray marching.
-		  const float clipNear = 0.0;
-		  const float clipFar = 16.0;
-		  float field = 0.;
-		  float dist = rayMarching(ro, rd, clipNear, clipFar, field );
-		  if ( dist >= clipFar ) {
-			gl_FragColor = vec4(vec3(1.), 1.0);
-			return;
-		  }
-	
-		  // sp - Surface position. If we've made it this far, we've hit something.
-		  vec3 sp = ro + rd*dist;
-	
-		  // Light the pixel that corresponds to the surface position. The last entry indicates that it's not a reflection pass
-		  // which we're not up to yet.
-		  vec3 sceneColor = lighting( sp, camera_position, 0, dist, field, rd);
-	
-		  // Clamping the lit pixel, then put it on the screen.
-		  gl_FragColor = vec4(clamp(sceneColor, 0.0, 1.0), 1.0);
-	
-	
-		}
-	</script>
-	<div id="cont2"></div>
-	<script  src="css/default.css"></script>	
-	<div id="content">
-		<svg xmlns:xlink="http://www.w3.org/1999/xlink" id="canvas">
-			<defs>
-			  <g id="heart">
-				<g>
-				  <g>
-					<path class="o_heart" d="M102.7,12.4L102.7,12.4C90.5,0.2,71.3-1,57.7,8.8c-13.6-9.9-32.9-8.7-45.2,3.5l0,0
-										  c-13.6,13.6-13.6,35.8,0,49.3L48.8,98c1.8,1.8,4,2.9,6.3,3.3c3.9,0.9,8.2-0.1,11.2-3.2l36.3-36.3C116.2,48.2,116.2,26,102.7,12.4
-										  z" />
-				  </g>
-				</g>
-				<g>
-				  <g>
-					<path class="i_heart"
-					  d="M74.7,34L74.7,34c-4.6-4.6-11.9-5.1-17.1-1.4c-5.2-3.8-12.5-3.3-17.1,1.3c-5.1,5.1-5.1,13.6,0,18.7
-										  l13.8,13.8c0.7,0.7,1.5,1.1,2.4,1.3c1.5,0.3,3.1-0.1,4.2-1.2l13.8-13.8C79.9,47.6,79.9,39.2,74.7,34z" />
-				  </g>
-				</g>
-			  </g>
-			</defs>
-		  </svg>
-		
-		<audio id="audio" src="sound.mp3" autoplay="autoplay" loop="loop" preload="auto"></audio>
-		<div id="code" style="display: none;">
-			<span class="comments">##</span><br/>
-			<span class="comments"># Merhaba, minik prensesim.</span><br/>
-			<span class="comments"># 3.5 yıldır birlikte olduğumuza hala şaşırıyorum.</span><br/>
-			<span class="comments"># Zaman ne çabukta geçiyor değil mi?</span><br/>
-			<span class="comments"># Bildiğin gibi birkaç aydır böyle şeylerle uğraşıyordum.</span><br/>
-			<span class="comments"># Fiziksel hediye vermekte kötü olduğumu da biliyorsun.</span><br/>
-			<span class="comments"># O yüzden böyle bir şey hazırlamak istedim.</span><br/>
-			<span class="comments"># Umarım bu yaptığımı beğenirsin.</span><br/>
+            // --- 1. ADIM: BAŞLANGIÇ ---
+            startButton.addEventListener('click', () => {
+                // Sadece bir kere oluştur ve başlat
+                if (!backgroundAudio) { 
+                    backgroundAudio = new Audio('sarki.mp3'); 
+                    backgroundAudio.loop = true;
+                    backgroundAudio.play().catch(e => {
+                         console.error("Ses dosyası oynatılamadı. Lütfen sayfa ile etkileşime geçin.", e);
+                    });
+                }
+                
+                switchScreen(startScreen, codeScreen);
+                startCodeAnimation();
+            });
 
-			<span class="comments">##</span><br/>
-			i = Boy(<span class="string">"Safer"</span>);<br/>
-			u = Girl(<span class="string">"Alaska"</span>);<br/>
-			<span class="comments"># 4 Kasım 2019 tarihinden itibaren duygularımızı paylaşıyoruz.  </span><br/>
-			i.met(u)<br/>
-			<span class="comments"># O günden sonra hayatta nasıl mutlu olabileceğimi keşfettim. </span><br/>
-			i.happyWith(u)<br/>
-			<span class="comments"># Birlikte çok zaman geçirdik</span><br/>
-			spentTime(u, i)<br/>
-			<span class="comments"># Birlikte çok eğlendik.</span><br/>
-			enjoy(u, i)<br/>
-			<span class="comments"># Her yeri gezdik.</span><br/>
-			vacation(u, i)<br/>
-			<span class="comments"># Gezilmeyecek yer,Yiyilecek yemek bırakmadık.</span><br/>
-			peak(u, i)<br/>
-			<span class="comments"># Maalesef, bazı zamanlar tartıştık ve küstük.</span><br/>
-			conflict(u, i, sometimes=<span class="keyword">True</span>)<br/>
-			<span class="comments"># Ama biz her zaman her hatamızı düzeltip yeniden ayağa kalkmayı bildik.</span><br/>
-			u.in_harmony_with(i) <br/>
-			i.in_harmony_with(u) <br/>
-			<span class="comments"># Sen benim hayattaki en değerli varlığımsın.</span><br/>
-			while <span class="keyword">True</span>:<br/>
-			<span class="placeholder"></span><span class="keyword">if</span> u.with(i):<br/>
-			<span class="placeholder"></span><span class="placeholder"></span>u = everything<br/>
-			<span class="placeholder"></span><span class="keyword">else</span>:<br/>
-			<span class="placeholder"></span><span class="placeholder"></span>everything = u<br/>
-			<span class="comments"># Benim en güzel rüyam senin bunları okurken tebessüm etmen olurdu.</span><br/>
-			i.live_happily_forever_with(u)<br/>
-			<span class="comments"># Sadece sevgililer günü değil hayatımın her anını özel kıldığın için teşekkür ederim.</span><br/>
-			<span class="comments"># Seni çok seviyorum bitanem. Sevgililer günümüz kutlu olsun.</span><br/>
-			Seni her zaman sevecek olan. 
-			
+            // --- 2. ADIM: KOD ANİMASYONU ---
+            async function startCodeAnimation() {
+                const container = document.getElementById('code-container');
+                container.innerHTML = '';
+                const codeLines = [
+                    { text: '/* Merhaba minik prensesim, */', type: 'comment'},
+                    { text: '\n/* Zamanın ne kadar hızlı aktığına hala inanamıyorum. */', type: 'comment'},
+                    { text: '\n/* Bu satırlar, bizim hikayemizin dijital bir yansıması... */', type: 'comment'},
+                    { text: '\n '},
+                    { text: '\nimport { ', type: 'keyword' }, { text: 'Destiny', type: 'class-name' }, { text: ', ', type: 'variable' }, { text: 'Love', type: 'class-name' }, { text: ', ', type: 'variable' }, { text: 'Connection', type: 'class-name' }, { text: ' } from ', type: 'keyword' }, { text: '"./universe.js"', type: 'string' }, { text: ';', type: 'variable' },
+                    { text: '\n '},
+                    { text: '\n// Evren, iki ruhu birbirine yazgılı kıldı.', type: 'comment'},
+                    { text: '\nconst ', type: 'keyword' }, { text: 'safer', type: 'variable' }, { text: ' = Destiny.forgeSoul({ name: ', type: 'variable' }, { text: '"Safer"', type: 'string' }, { text: ' });', type: 'variable' },
+                    { text: '\nconst ', type: 'keyword' }, { text: 'alaska', type: 'variable' }, { text: ' = Destiny.forgeSoul({ name: ', type: 'variable' }, { text: '"Alaska"', type: 'string' }, { text: ' });', type: 'variable' },
+                    { text: '\n '},
+                    { text: '\n// 4 Kasım 2019: Ve yıldızlar, o büyük an için aynı hizaya geldi.', type: 'comment'},
+                    { text: '\nconst ', type: 'keyword' }, { text: 'ourConnection', type: 'variable' }, { text: ' = await Destiny.alignStars(safer, alaska);', type: 'function' },
+                    { text: '\n '},
+                    { text: '\n// O günden sonra hayatta nasıl mutlu olabileceğimi keşfettim.', type: 'comment'},
+                    { text: '\nourConnection.on("happy", () => {', type: 'function'},
+                    { text: '\n  console.log("Hayatımın anlamı oldun.");', type: 'string'},
+                    { text: '\n});', type: 'function'},
+                    { text: '\n '},
+                    { text: '\n// Birlikte sayısız anı biriktirdik, yeni dünyalar keşfettik...', type: 'comment'},
+                    { text: '\nconst ', type: 'keyword' }, { text: 'memories', type: 'variable' }, { text: ' = [', type: 'variable' },
+                    { text: '\n  explore("dağlar", "denizler", "şehirler"),', type: 'string'},
+                    { text: '\n  taste("tüm lezzetler, iyi veya kötü"),', type: 'string'},
+                    { text: '\n  laugh("bazen sebepsizce, sabahlara kadar")', type: 'string'},
+                    { text: '\n];', type: 'variable' },
+                    { text: '\nourConnection.addMemories(memories);', type: 'function' },
+                    { text: '\n '},
+                    { text: '\n// Elbette, her kodda olduğu gibi bizimkinde de hatalar oldu.', type: 'comment'},
+                    { text: '\nourConnection.onError((error) => {', type: 'function'},
+                    { text: '\n  // Ama her hatayı, sevgimizle ve sabrımızla onardık.', type: 'comment'},
+                    { text: '\n  Love.patch(error, { with: ', type: 'variable' }, { text: '"sabır"', type: 'string' }, { text: ', and: ', type: 'variable' }, { text: '"anlayış"', type: 'string' }, { text: ' });', type: 'variable' },
+                    { text: '\n  console.log("Ve her seferinde daha da güçlendik.");', type: 'string'},
+                    { text: '\n});', type: 'function'},
+                    { text: '\n '},
+                    { text: '\n// Sen benim evrenimdeki en parlak yıldızsın, her şeyimsin.', type: 'comment'},
+                    { text: '\nconst ', type: 'keyword'}, {text: 'Everything', type: 'class-name'}, {text: ' = alaska;', type: 'variable'},
+                    { text: '\n '},
+                    { text: '\n// Ve aşkımız, sonsuz bir döngüde çalışmaya devam edecek.', type: 'comment' },
+                    { text: '\nsetInterval(() => {', type: 'function'},
+                    { text: '\n  safer.love(Everything, "unconditionally");', type: 'function'},
+                    { text: '\n  alaska.complete(safer);', type: 'function'},
+                    { text: '\n}, 1);', type: 'variable'},
+                    { text: '\n '},
+                    { text: '\n// İmza: Kalbinin en sadık programcısı, Safer.', type: 'comment' },
+                ];
+                await typeLines(codeLines, container);
+                nextStepButton.classList.add('visible');
+            }
+            
+            async function typeLines(lines, element) {
+                let currentLineEl = document.createElement('div');
+                currentLineEl.className = 'code-line';
+                element.appendChild(currentLineEl);
 
-		</div>
-		<div id="loveHeart">
-			<canvas id="garden"></canvas>
-			<div id="words">
-				<div id="messages">
-					Sapsarı saçlarından
-					<div id="elapseClock"></div>
-				</div>
-				<div id="loveu">
-					Love u forever and ever.<br/>
-					<div class="signature">- Safer</div>
-				</div>
-			</div>
-		</div>
-		<span id="tekrar_tikla" class="tye">Tekrar tıkla.</span>
-	</div>
-	
-</div>
+                for (const segment of lines) {
+                    if (segment.text.startsWith('\n')) {
+                        currentLineEl = document.createElement('div');
+                        currentLineEl.className = 'code-line';
+                        element.appendChild(currentLineEl);
+                        segment.text = segment.text.substring(1);
+                    }
+                    await typeSegment(segment.text, segment.type, currentLineEl);
+                    element.scrollTop = element.scrollHeight;
+                }
+            }
 
+            function typeSegment(text, type, element) {
+                return new Promise(resolve => {
+                    let i = 0;
+                    const span = document.createElement('span');
+                    span.className = type;
+                    element.appendChild(span);
+                    const interval = setInterval(() => {
+                        if (i < text.length) {
+                            span.innerHTML += text.charAt(i).replace(/ /g, ' ');
+                            i++;
+                        } else {
+                            clearInterval(interval);
+                            resolve();
+                        }
+                    }, 40); 
+                });
+            }
 
+            // --- 3. ADIM: ANILAR EKRANI ---
+            nextStepButton.addEventListener('click', () => {
+                switchScreen(codeScreen, memoryScreen);
+                startMemoryLane();
+            });
+            
+            function startMemoryLane() {
+                const constellationContainer = document.getElementById('constellation-container');
+                const memories = [
+                     { text: "İlk 'Merhaba'...", image: "https://i.imgur.com/UV7zDwL.jpeg" },
+                     { text: "Coronadan korunurken", image: "https://i.imgur.com/HVRCmOv.jpeg" },
+                     { text: "Beni yerken", image: "https://i.imgur.com/VI7ftcN.jpeg" },
+                     { text: "Ucuz ve Lezzetli", image: "https://i.imgur.com/szMfCxB.jpeg" },
+                     { text: "En sevdiğin hediye", image: "https://i.imgur.com/gGldUyG.jpeg" },
+                     { text: "Komik bir an", image: "https://i.imgur.com/7Npsxhy.jpeg" },
+                     { text: "Kavuştuğumuz ilk an", image: "https://i.imgur.com/IZDgia6.jpeg" },
+                     { text: "Beşiktaş güzeli", image: "https://i.imgur.com/uGeTJZ9.jpeg" },
+                     { text: "İlk birlikte doğum günün", image: "https://i.imgur.com/VWP7U57.jpeg" },
+                     { text: "Bana verdiğin güzel hediye", image: "https://i.imgur.com/05kl5aV.jpeg" },
+                     { text: "Sana pastanı keserken o sırada sen", image: "https://i.imgur.com/Rw6NwoR.jpeg" },
+                     { text: "Tavşandan daha tatlı olmak'", image: "https://i.imgur.com/nsWdzWy.jpeg" },
+                     { text: "Öpmeye doyamadığım zamanlar", image: "https://i.imgur.com/jhVlvgC.jpeg" },
+                ];
+                
+                const placedConstellations = [];
+                const minDistance = 20;
 
+                function isTooClose(newPos) {
+                    for (const pos of placedConstellations) {
+                        const dx = pos.x - newPos.x;
+                        const dy = pos.y - newPos.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        if (distance < minDistance) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }
 
-<script type="text/javascript">
+                let delay = 500;
+                memories.forEach((memory) => {
+                    setTimeout(() => {
+                        let position;
+                        let attempts = 0;
+                        do {
+                            position = {
+                                x: Math.random() * 80 + 10,
+                                y: Math.random() * 50 + 25
+                            };
+                            attempts++;
+                        } while (isTooClose(position) && attempts < 100);
 
-document.getElementById("tekrar_tikla").style.display = "none";
-setTimeout(function(){
-  document.getElementById("tekrar_tikla").style.display = "inline";
-}, 150000);
+                        placedConstellations.push(position);
 
-document.querySelector(".tye").addEventListener("click", function(event) {
-event.preventDefault();
-  init();
-  animate();
-  setTimeout(function() {
-    document.querySelector(".tye").style.display = "none";
-	document.querySelector("#canvas").style.display = "none";
-	document.querySelector(".text").style.display = "none";
+                        const constellation = document.createElement('div');
+                        constellation.className = 'constellation';
+                        constellation.style.top = `${position.y}%`;
+                        constellation.style.left = `${position.x}%`;
+                        constellation.style.animationDelay = `${Math.random() * 8}s`;
 
+                        const star = document.createElement('div');
+                        star.className = 'star';
+                        constellation.appendChild(star);
+                        
+                        const popup = document.createElement('div');
+                        popup.className = 'memory-popup';
+                        
+                        const img = document.createElement('img');
+                        img.className = 'memory-image';
+                        img.src = memory.image;
+                        img.onerror = () => { img.src = "https://placehold.co/150x150/ff0000/FFFFFF?text=Hata"; };
 
-	
-  }, 1);
-  
-});
-document.querySelector(".text").addEventListener("click", function(event) {
-  event.preventDefault();
-  setTimeout(function() {
-    document.querySelector(".text").style.display = "none";
-	document.querySelector("#canvas").style.display = "none";
-  }, 1);
-  
-});
+                        const text = document.createElement('div');
+                        text.className = 'memory-text';
+                        text.textContent = memory.text;
 
-const button = document.querySelector('.text');
-const button2 = document.querySelector('.tye');
-  const code = document.querySelector('#code');
-  button.addEventListener('click', function() {
-    code.style.display = 'block';
-	if (!document.createElement('canvas').getContext) {
-		var msg = document.createElement("div");
-		msg.id = "errorMsg";
-		msg.innerHTML = "Your browser doesn't support HTML5!<br/>Recommend use Chrome 14+/IE 9+/Firefox 7+/Safari 4+";
-		document.body.appendChild(msg);
-		$("#code").css("display", "none")
-		$("#copyright").css("position", "absolute");
-		$("#copyright").css("bottom", "10px");
-		document.execCommand("stop");
-		
-	} else {
-		setTimeout(function () {
-			startHeartAnimation();
-		}, 55000);
+                        popup.appendChild(img);
+                        popup.appendChild(text);
+                        constellation.appendChild(popup);
 
-		timeElapse(together);
-		setInterval(function () {
-			timeElapse(together);
-		}, 500);
+                        constellation.addEventListener('mouseenter', () => {
+                            constellation.classList.add('hovered');
+                        });
+                        constellation.addEventListener('mouseleave', () => {
+                            constellation.classList.remove('hovered');
+                        });
+                        
+                        constellationContainer.appendChild(constellation);
+                        
+                        setTimeout(() => constellation.classList.add('visible'), 100);
 
-		adjustCodePosition();
-		$("#code").typewriter();
-		
-	
-	}
+                    }, delay);
+                    delay += 300;
+                });
+                
+                for (let i = 0; i < 5; i++) {
+                    createShootingStar();
+                }
 
-  });
+                setInterval(createShootingStar, 1500);
 
-   function music_play() {
-      document.getElementById("audio").play();
-    };
-	var offsetX = $("#loveHeart").width() / 2;
-	var offsetY = $("#loveHeart").height() / 2 - 55;
-	var together = new Date();
-	// 此处月份介于 0 ~ 11 之间。用本地时间表示，如 8 月要用 7 表示。
-	together.setFullYear(2019, 11, 4);
-	together.setHours(15);
-	together.setMinutes(0);
-	together.setSeconds(0);
-	together.setMilliseconds(0);
+                setTimeout(() => {
+                     finalStepButton.classList.add('visible');
+                }, delay + 500);
+            }
+            
+            function createShootingStar() {
+                const container = document.getElementById('shooting-stars-container');
+                if(!container) return;
+                const shootingStar = document.createElement('div');
+                shootingStar.classList.add('shooting-star');
+                shootingStar.style.top = `${Math.random() * 100}%`;
+                shootingStar.style.left = `-${Math.random() * 50}%`;
+                const duration = Math.random() * 2 + 3;
+                shootingStar.style.animationDuration = `${duration}s, ${duration}s`;
+                shootingStar.style.animationDelay = `${Math.random() * 5}s`;
+                container.appendChild(shootingStar);
+                
+                 setTimeout(() => {
+                    shootingStar.remove();
+                }, (duration + parseFloat(shootingStar.style.animationDelay)) * 1000);
+            }
 
-	useScreenPixelRatio = false;
+            // --- 4. ADIM: KALP BAHÇESİ ---
+            finalStepButton.addEventListener('click', () => {
+                document.body.style.backgroundColor = '#1a0208';
+                switchScreen(memoryScreen, gardenScreen);
+                startGarden();
+            });
 
-/*
-Most of the stuff in here is just bootstrapping. Essentially it's just
-setting ThreeJS up so that it renders a flat surface upon which to draw 
-the shader. The only thing to see here really is the uniforms sent to 
-the shader. Apart from that all of the magic happens in the HTML view
-under the fragment shader.
-*/
+            function startGarden() {
+                const canvas = document.getElementById('garden-canvas');
+                const ctx = canvas.getContext('2d');
+                
+                function resizeCanvas() {
+                    canvas.width = window.innerWidth;
+                    canvas.height = window.innerHeight;
+                }
+                window.addEventListener('resize', resizeCanvas);
+                resizeCanvas();
 
-let cont2;
-let camera, scene, renderer;
-let uniforms;
+                let elements = [
+                    ...Array.from({ length: 150 }, () => new Heart()),
+                    ...Array.from({ length: 50 }, () => new Star())
+                ];
 
+                function Heart() {
+                    this.x = Math.random() * canvas.width;
+                    this.y = canvas.height + Math.random() * canvas.height;
+                    this.size = Math.random() * 20 + 5;
+                    this.speedY = Math.random() * 2 + 1;
+                    this.opacity = Math.random() * 0.5 + 0.2;
+                    this.color = `hsl(${Math.random() * 20 + 330}, 100%, ${Math.random() * 30 + 60}%)`;
+                    
+                    this.update = function() {
+                        this.y -= this.speedY;
+                        if (this.y < -this.size) {
+                            this.y = canvas.height + this.size;
+                            this.x = Math.random() * canvas.width;
+                        }
+                    };
+                    
+                    this.draw = function() {
+                        ctx.save();
+                        ctx.globalAlpha = this.opacity;
+                        ctx.fillStyle = this.color;
+                        ctx.shadowColor = this.color;
+                        ctx.shadowBlur = 15;
+                        ctx.beginPath();
+                        const topCurveHeight = this.size * 0.3;
+                        ctx.moveTo(this.x, this.y + topCurveHeight);
+                        ctx.bezierCurveTo(this.x, this.y, this.x - this.size / 2, this.y, this.x - this.size / 2, this.y + topCurveHeight);
+                        ctx.bezierCurveTo(this.x - this.size / 2, this.y + (this.size + topCurveHeight) / 2, this.x, this.y + this.size, this.x, this.y + this.size);
+                        ctx.bezierCurveTo(this.x, this.y + this.size, this.x + this.size / 2, this.y + (this.size + topCurveHeight) / 2, this.x + this.size / 2, this.y + topCurveHeight);
+                        ctx.bezierCurveTo(this.x + this.size / 2, this.y, this.x, this.y, this.x, this.y + topCurveHeight);
+                        ctx.closePath();
+                        ctx.fill();
+                        ctx.restore();
+                    };
+                }
 
-function init() {
-  cont2 = document.getElementById('cont2');
+                function Star() {
+                    this.x = Math.random() * canvas.width;
+                    this.y = canvas.height + Math.random() * canvas.height;
+                    this.size = Math.random() * 2 + 1;
+                    this.speedY = Math.random() * 1.5 + 0.5;
+                    this.opacity = Math.random() * 0.7 + 0.3;
+                    
+                    this.update = function() {
+                        this.y -= this.speedY;
+                        if (this.y < -this.size) {
+                            this.y = canvas.height + this.size;
+                            this.x = Math.random() * canvas.width;
+                        }
+                    };
 
-  camera = new THREE.Camera();""
-  camera.position.z = 1;
+                    this.draw = function() {
+                        ctx.save();
+                        ctx.globalAlpha = this.opacity;
+                        ctx.fillStyle = 'white';
+                        ctx.shadowColor = 'white';
+                        ctx.shadowBlur = 10;
+                        ctx.beginPath();
+                        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.restore();
+                    };
+                }
 
-  scene = new THREE.Scene();
+                function animate() {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    elements.forEach(el => { el.update(); el.draw(); });
+                    requestAnimationFrame(animate);
+                }
+                animate();
+                
+                const finalMessage = document.getElementById('final-message');
+                setTimeout(() => {
+                    finalMessage.classList.add('visible');
+                    futureDreamBtn.style.display = 'inline-block';
+                    startClock();
+                }, 1500);
+            }
+            
+            // --- GELECEK HAYALİ LOGIC ---
+            futureDreamBtn.addEventListener('click', async () => {
+                modalText.innerHTML = '';
+                modalLoader.style.display = 'block';
+                modal.classList.add('visible');
 
-  var geometry = new THREE.PlaneBufferGeometry(2, 2);
+                const prompt = `Lütfen ${storyData.partner1} ve ${storyData.partner2} isimli çiftin geleceği hakkında, sanki bir masaldan fırlamış gibi, kısa, kalpleri ısıtan ve çok romantik bir Türkçe paragraf yaz.`;
+                const result = await callGeminiAPI(prompt);
 
-  uniforms = {
-    u_time: { type: "f", value: 1.0 },
-    u_resolution: { type: "v2", value: new THREE.Vector2() },
-    u_mouse: { type: "v2", value: new THREE.Vector2(window.innerWidth / 2, window.innerHeight / 2) } };
+                modalLoader.style.display = 'none';
+                modalText.textContent = result;
+            });
 
+            // --- MODAL KAPATMA ---
+            modalCloseBtn.addEventListener('click', () => modal.classList.remove('visible'));
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('visible');
+                }
+            });
+            
+            // --- ZAMANLAYICI ---
+            function startClock(){
+                const together = new Date(storyData.meetDate);
+                const clock = document.getElementById('elapseClock');
+                if (!clock) return;
 
-  var material = new THREE.ShaderMaterial({
-    uniforms: uniforms,
-    vertexShader: document.getElementById('vertexShader').textContent,
-    fragmentShader: document.getElementById('fragmentShader').textContent });
+                function updateClock(){
+                    const diff = new Date() - together;
+                    const d = Math.floor(diff / (1000*60*60*24));
+                    const h = Math.floor((diff / (1000*60*60)) % 24);
+                    const m = Math.floor((diff / 1000/60) % 60);
+                    const s = Math.floor((diff / 1000) % 60);
+                    clock.innerHTML = `<span class="digit">${d}</span> gün <span class="digit">${h}</span> saat <span class="digit">${m}</span> dakika <span class="digit">${s}</span> saniye`;
+                }
+                updateClock();
+                setInterval(updateClock, 1000);
+            }
 
-
-  var mesh = new THREE.Mesh(geometry, material);
-  scene.add(mesh);
-
-  renderer = new THREE.WebGLRenderer();
-  renderer.setPixelRatio(window.devicePixelRatio);
-  if (!useScreenPixelRatio) {
-    renderer.setPixelRatio(1);
-  }
-
-  cont2.appendChild(renderer.domElement);
-
-  onWindowResize();
-  window.addEventListener('resize', onWindowResize, false);
-
-  document.onmousemove = function (e) {
-    uniforms.u_mouse.value.x = e.pageX;
-    uniforms.u_mouse.value.y = e.pageY;
-  };
-}
-
-function onWindowResize(event) {
-  let w = window.innerWidth;
-  let h = window.innerHeight;
-
-  if (w > 1920) w = 1920;
-  if (h > 1080) h = 1080;
-
-  renderer.setSize(w, h);
-  uniforms.u_resolution.value.x = w;
-  uniforms.u_resolution.value.y = h;
-}
-
-function animate() {
-  requestAnimationFrame(animate);
-  render();
-}
-
-function render() {
-  uniforms.u_time.value += 0.04;
-  renderer.render(scene, camera);
-}
-
-
-
-
-</script>
-
+        });
+    </script>
 </body>
 </html>
