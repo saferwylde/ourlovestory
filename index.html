@@ -1,0 +1,1004 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bizim Hikayemiz</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Montserrat:wght@400;700&family=Source+Code+Pro&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- TEMEL STİLLER --- */
+        :root {
+            --bg-color: #FFF8F9;
+            --primary-color: #E6AAB7;
+            --secondary-color: #D988A0;
+            --text-color: #4A4A4A;
+            --accent-color: #D4AF37;
+            --comment-color: #9E9E9E;
+            --string-color: #C78283;
+            --dark-bg: #1a0208;
+            --particle-color: rgba(230, 170, 183, 0.5);
+            --star-bg: radial-gradient(ellipse at bottom, #1B2735 0%, #090A0F 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+            transition: background-color 1s ease;
+        }
+
+        /* --- BUTON STİLLERİ --- */
+        .button {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: bold;
+            font-size: 1.2em;
+            color: white;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+            padding: 18px 36px;
+            border-radius: 50px;
+            border: none;
+            box-shadow: 0 4px 15px rgba(217, 136, 160, 0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 100;
+        }
+
+        .button:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(217, 136, 160, 0.3);
+        }
+
+        /* --- EKRANLAR --- */
+        .screen {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: none; /* Ekranlar varsayılan olarak gizli */
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        .screen.active {
+            display: flex; /* Sadece aktif ekran görünür */
+        }
+
+        /* --- PARÇACIK ANİMASYONU --- */
+        #particle-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+        }
+        .particle {
+            position: absolute;
+            background-color: var(--particle-color);
+            border-radius: 50%;
+            animation: float 25s infinite ease-in-out;
+        }
+        @keyframes float {
+            0% { transform: translateY(0) translateX(0); }
+            50% { transform: translateY(-100vh) translateX(50px); }
+            100% { transform: translateY(0) translateX(0); opacity: 0; }
+        }
+
+
+        /* --- KOD YAZMA EKRANI --- */
+        #code-container {
+            width: 90%;
+            max-width: 700px;
+            height: auto;
+            max-height: 60vh;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            font-family: 'Source Code Pro', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.7;
+            overflow-y: auto;
+            border: 1px solid #f0e2e5;
+        }
+        
+        .code-line { white-space: pre-wrap; }
+        .comment { color: var(--comment-color); font-style: italic;}
+        .keyword { color: var(--secondary-color); font-weight: bold; }
+        .variable { color: var(--text-color); }
+        .string { color: var(--string-color); }
+        .function { color: var(--primary-color); }
+        .class-name { color: var(--accent-color); font-weight: bold;}
+
+        #next-step-button {
+            margin-top: 25px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease 0.5s, transform 0.5s ease 0.5s;
+        }
+
+        #next-step-button.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* --- YENİ SÜRPRİZ EKRANI: ANILAR --- */
+        #memory-screen {
+            background: var(--star-bg);
+            color: #fff;
+            overflow: hidden;
+            justify-content: flex-start;
+        }
+        #memory-title {
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 400;
+            letter-spacing: 1.5px;
+            font-size: clamp(1.5rem, 5vw, 2.2rem);
+            color: #fff;
+            text-shadow: 0 0 15px var(--primary-color);
+            margin-top: 8vh;
+            margin-bottom: auto;
+            z-index: 10;
+        }
+        #constellation-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+        .constellation {
+            position: absolute;
+            opacity: 0;
+            transform: scale(0.5);
+            transition: opacity 1s ease, transform 1s ease;
+            cursor: pointer;
+            z-index: 2;
+            animation: float-constellation 8s infinite ease-in-out;
+        }
+        @keyframes float-constellation {
+            0% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-10px) scale(1.05); }
+            100% { transform: translateY(0px) scale(1); }
+        }
+        .constellation.visible {
+             opacity: 1;
+            transform: scale(1);
+        }
+        .constellation .star {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            background-color: white;
+            border-radius: 50%;
+            box-shadow: 0 0 12px white, 0 0 24px white;
+            animation: twinkle 2s infinite ease-in-out;
+        }
+        @keyframes twinkle {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 12px white, 0 0 24px white; }
+            50% { transform: scale(0.8); box-shadow: 0 0 6px white, 0 0 12px white;}
+        }
+
+        .constellation .memory-popup {
+            position: absolute;
+            bottom: 120%;
+            left: 50%;
+            transform: translateX(-50%) scale(0.8);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.4s, visibility 0.4s, transform 0.4s;
+            background: white;
+            padding: 10px;
+            border-radius: 8px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            width: 170px;
+            z-index: 30;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .constellation:hover .memory-popup {
+            opacity: 1;
+            visibility: visible;
+            transform: translateX(-50%) scale(1);
+        }
+        
+        .constellation.hovered {
+            z-index: 100;
+        }
+
+        .constellation .memory-image {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            display: block;
+            border: 5px solid white;
+        }
+        
+        .constellation .memory-text {
+            margin-top: 8px;
+            text-align: center;
+            color: #333;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 0.9rem;
+            font-weight: bold;
+            line-height: 1.3;
+            width: 100%; 
+            word-wrap: break-word;
+        }
+        
+        .shooting-star {
+            position: absolute;
+            height: 2px;
+            background: linear-gradient(-45deg, rgba(255,255,255,1), rgba(255,255,255,0));
+            border-radius: 999px;
+            filter: drop-shadow(0 0 6px white);
+            animation: tail 3s ease-in-out infinite, shooting 3s ease-in-out infinite;
+        }
+        @keyframes tail {
+            0% { width: 0; }
+            30% { width: 100px; }
+            100% { width: 0; }
+        }
+        @keyframes shooting {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(300px); }
+        }
+        
+        #final-step-button {
+            opacity: 0;
+            transition: opacity 1s ease 1s;
+            position: absolute;
+            bottom: 8vh;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+        }
+         #final-step-button.visible {
+            opacity: 1;
+        }
+
+        /* --- YÜKLEME ANİMASYONU --- */
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* --- KALP BAHÇESİ EKRANI --- */
+        #garden-screen { background-color: var(--dark-bg); }
+        #garden-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        #final-message {
+            z-index: 10;
+            text-align: center;
+            color: white;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: opacity 1.5s ease, transform 1.5s ease;
+        }
+        #final-message.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+        #final-message h1 {
+            font-family: 'Great Vibes', cursive;
+            font-size: clamp(2.5rem, 10vw, 6rem);
+            font-weight: normal;
+            text-shadow: 0 0 10px #fff, 0 0 20px var(--primary-color), 0 0 30px var(--primary-color), 0 0 40px var(--primary-color);
+        }
+        #final-message p { font-size: clamp(1rem, 4vw, 1.5rem); margin-top: 10px; }
+        #elapseClock { margin-top: 20px; font-size: 1.2rem; letter-spacing: 2px; }
+        .digit { font-weight: bold; color: var(--primary-color); }
+
+        /* --- MODAL PENCERE --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .modal-overlay.visible {
+            display: flex;
+            opacity: 1;
+        }
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+        }
+        .modal-overlay.visible .modal-content {
+            transform: scale(1);
+        }
+        .modal-close {
+            position: absolute;
+            top: 10px; right: 15px;
+            background: none; border: none;
+            font-size: 2rem;
+            color: #aaa;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .modal-close:hover {
+            color: #333;
+        }
+        #modal-text {
+            white-space: pre-wrap;
+            line-height: 1.6;
+            text-align: center;
+        }
+
+        /* --- MOBİL UYUMLULUK --- */
+        @media (max-width: 768px) {
+            /* Butonları küçült */
+            .button {
+                font-size: 1em;
+                padding: 14px 28px;
+            }
+
+            /* Kod yazma alanını ayarla */
+            #code-container {
+                font-size: 11px; /* Mobil için daha okunaklı */
+                max-height: 70vh; /* Yüksekliği artır */
+                padding: 15px;
+            }
+            #next-step-button {
+                margin-top: 15px;
+            }
+
+            /* Anılar ekranı başlığını ayarla */
+            #memory-title {
+                margin-top: 12vh;
+                text-align: center; /* Ortala */
+                padding: 0 10px; /* Kenarlara yapışmasın */
+            }
+
+            /* Anı pencerelerinin mobil ekrana sığmasını sağla */
+            .constellation .memory-popup {
+                width: 150px; /* Genişliği biraz küçült */
+            }
+            .constellation .memory-image {
+                width: 130px; /* Resmi küçült */
+                height: 130px;
+            }
+
+            /* Final mesajı fontlarını ayarla */
+            #final-message h1 {
+                font-size: clamp(2.5rem, 15vw, 6rem); /* Mobilde daha belirgin */
+            }
+            #final-message p {
+                font-size: clamp(1rem, 5vw, 1.5rem);
+            }
+            #elapseClock {
+                font-size: 1rem;
+                letter-spacing: 1px;
+                line-height: 1.4; /* Satır kaymasını engelle */
+            }
+            
+            /* Modal pencereyi ayarla */
+            .modal-content {
+                padding: 20px;
+            }
+
+            /* Safer'e Sor kutusunu mobil uyum */
+            #ask-safer-container {
+                right: 10px !important;
+                left: 10px;
+                bottom: 10px !important;
+                width: auto;
+                max-width: 98vw;
+                align-items: stretch !important;
+            }
+            #ask-safer-input {
+                min-width: 0 !important;
+                width: 100%;
+                font-size: 1em;
+            }
+            #ask-safer-button {
+                font-size: 1em;
+                padding: 10px 10px;
+            }
+            #ask-safer-answer {
+                min-width: 0 !important;
+                max-width: 100vw !important;
+                font-size: 1em;
+                word-break: break-word;
+            }
+        }
+
+        /* iPhone 15 Pro Max özel boyutları için ekstra iyileştirme */
+        @media (max-width: 450px) {
+            #code-container, .modal-content {
+                max-width: 98vw;
+                padding: 8px;
+            }
+            #final-message {
+                padding: 0 8px;
+            }
+            #ask-safer-container {
+                left: 2vw;
+                right: 2vw;
+                bottom: 2vw;
+                max-width: 96vw;
+            }
+            #ask-safer-answer {
+                padding: 8px 8px;
+            }
+        }
+
+    </style>
+</head>
+<body>
+    <div id="start-screen" class="screen active">
+        <div id="particle-container"></div>
+        <button id="start-button" class="button">Hikayemiz</button>
+    </div>
+
+    <div id="code-screen" class="screen">
+        <div id="code-container"></div>
+        <button id="next-step-button" class="button">Anı Haritamıza Bakalım</button>
+    </div>
+    
+    <div id="memory-screen" class="screen">
+        <div id="shooting-stars-container"></div>
+        <h2 id="memory-title">Anılarımızın Yıldız Haritası</h2>
+        <div id="constellation-container"></div>
+        <button id="final-step-button" class="button">Ve İşte Final...</button>
+    </div>
+
+    <div id="garden-screen" class="screen">
+        <canvas id="garden-canvas"></canvas>
+        <div id="final-message">
+            <h1>İyi'ki varsın.</h1>
+            <p id="final-name">- Alaska'ya -</p>
+            <div id="elapseClock"></div>
+            <button id="future-dream-button" class="button gemini-button" style="display: none; margin-top: 20px;">Geleceğimizi Hayal Et</button>
+        </div>
+        <!-- Safer'e Sor kutusu -->
+        <div id="ask-safer-container" style="position: fixed; bottom: 30px; right: 30px; z-index: 200; display: none; flex-direction: column; align-items: flex-end;">
+            <div style="display: flex; gap: 8px;">
+                <input id="ask-safer-input" type="text" placeholder="Safer'e sor..." style="padding: 10px 14px; border-radius: 20px; border: 1px solid #ccc; font-size: 1em; min-width: 220px; outline: none;">
+                <button id="ask-safer-button" class="button" style="padding: 10px 18px; font-size: 1em; border-radius: 20px;">Safer'e Sor</button>
+            </div>
+            <div id="ask-safer-answer" style="margin-top: 10px; background: rgba(255,255,255,0.95); color: #333; border-radius: 12px; padding: 12px 16px; min-width: 220px; max-width: 320px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); font-size: 1em; display: none;"></div>
+        </div>
+    </div>
+
+    <div id="gemini-modal" class="modal-overlay">
+        <div class="modal-content">
+            <button id="modal-close-button" class="modal-close">×</button>
+            <div class="loader" style="display: none;"></div>
+            <div id="modal-text"></div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- ELEMENTLER ---
+            const startButton = document.getElementById('start-button');
+            const nextStepButton = document.getElementById('next-step-button');
+            const finalStepButton = document.getElementById('final-step-button');
+            
+            const startScreen = document.getElementById('start-screen');
+            const codeScreen = document.getElementById('code-screen');
+            const memoryScreen = document.getElementById('memory-screen');
+            const gardenScreen = document.getElementById('garden-screen');
+
+            const futureDreamBtn = document.getElementById('future-dream-button');
+            const modal = document.getElementById('gemini-modal');
+            const modalCloseBtn = document.getElementById('modal-close-button');
+            const modalText = document.getElementById('modal-text');
+            const modalLoader = document.querySelector('#gemini-modal .loader');
+            
+            let backgroundAudio; 
+
+            // --- Hikaye Verileri ---
+            const storyData = {
+                partner1: "Alaska",
+                partner2: "Safer",
+                meetDate: "2019-11-04T15:00:00"
+            };
+            
+            // document.getElementById('final-name').textContent = `- ${storyData.partner2}'den ${storyData.partner1}'sına -`;
+
+            // --- API Fonksiyonu ---
+            // LÜTFEN KENDİ GEMINI API ANAHTARINIZI AŞAĞIYA YAZIN
+            // https://aistudio.google.com/app/apikey adresinden alabilirsiniz.
+            const apiKey = "AIzaSyCFcN10N5KyY2aCIFGCMYLMGqj06WQX4to"; // <-- Buraya kendi API anahtarınızı girin
+            
+            // Model adı 'gemini-2.0-flash' olarak güncellendi.
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+            
+            async function callGeminiAPI(prompt) {
+                if (apiKey === "") {
+                    modalText.textContent = "Geçerli bir Google Gemini API anahtarı eklenmemiş. Lütfen index.html dosyasındaki apiKey değişkenine kendi anahtarınızı girin.";
+                    modalLoader.style.display = 'none';
+                    return;
+                }
+
+                const payload = {
+                    contents: [{ role: "user", parts: [{ text: prompt }] }],
+                    safetySettings: [
+                        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
+                        { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
+                    ]
+                };
+
+                try {
+                    const response = await fetch(apiUrl, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        console.error("API Hatası Detayları:", errorData);
+                        throw new Error(`API Hatası: ${response.status}. Detaylar için konsolu kontrol edin.`);
+                    }
+                    const result = await response.json();
+                    
+                    if (result.candidates && result.candidates[0].content.parts[0].text) {
+                        return result.candidates[0].content.parts[0].text;
+                    } else {
+                        console.log("API'den beklenen formatta cevap alınamadı:", result);
+                        return "Üzgünüm, bir şeyler ters gitti ve anlamlı bir cevap alamadım.";
+                    }
+                } catch (error) {
+                    console.error("Gemini API çağrısı başarısız:", error);
+                    return `İstek gönderilirken bir hata oluştu: ${error.message}`;
+                }
+            }
+            
+            // ... (Script'in geri kalanı öncekiyle aynı, değişiklik yok) ...
+
+            function createParticles() {
+                const container = document.getElementById('particle-container');
+                if (!container) return;
+                for (let i = 0; i < 50; i++) {
+                    const particle = document.createElement('div');
+                    particle.classList.add('particle');
+                    const size = Math.random() * 10 + 5;
+                    particle.style.width = `${size}px`;
+                    particle.style.height = `${size}px`;
+                    particle.style.left = `${Math.random() * 100}%`;
+                    particle.style.bottom = `-${size}px`;
+                    particle.style.animationDelay = `${Math.random() * 25}s`;
+                    particle.style.animationDuration = `${Math.random() * 15 + 10}s`;
+                    container.appendChild(particle);
+                }
+            }
+            createParticles();
+
+
+            function switchScreen(from, to) {
+                from.classList.remove('active');
+                to.classList.add('active');
+            }
+
+            startButton.addEventListener('click', () => {
+                if (!backgroundAudio) { 
+                    backgroundAudio = new Audio('sarki.mp3'); 
+                    backgroundAudio.loop = true;
+                    backgroundAudio.play().catch(e => {
+                         console.error("Ses dosyası oynatılamadı. Lütfen sayfa ile etkileşime geçin.", e);
+                    });
+                }
+                
+                switchScreen(startScreen, codeScreen);
+                startCodeAnimation();
+            });
+
+            async function startCodeAnimation() {
+                const container = document.getElementById('code-container');
+                container.innerHTML = '';
+                const codeLines = [
+                    { text: '/* Merhaba minik prensesim, */', type: 'comment'},
+                    { text: '\n/* Zamanın ne kadar hızlı aktığına hala inanamıyorum. */', type: 'comment'},
+                    { text: '\n/* Bu satırlar, bizim hikayemizin dijital bir yansıması... */', type: 'comment'},
+                    { text: '\n '},
+                    { text: '\nimport { ', type: 'keyword' }, { text: 'Destiny', type: 'class-name' }, { text: ', ', type: 'variable' }, { text: 'Love', type: 'class-name' }, { text: ', ', type: 'variable' }, { text: 'Connection', type: 'class-name' }, { text: ' } from ', type: 'keyword' }, { text: '"./universe.js"', type: 'string' }, { text: ';', type: 'variable' },
+                    { text: '\n '},
+                    { text: '\n// Evren, iki ruhu birbirine yazgılı kıldı.', type: 'comment'},
+                    { text: '\nconst ', type: 'keyword' }, { text: 'safer', type: 'variable' }, { text: ' = Destiny.forgeSoul({ name: ', type: 'variable' }, { text: '"Safer"', type: 'string' }, { text: ' });', type: 'variable' },
+                    { text: '\nconst ', type: 'keyword' }, { text: 'alaska', type: 'variable' }, { text: ' = Destiny.forgeSoul({ name: ', type: 'variable' }, { text: '"Alaska"', type: 'string' }, { text: ' });', type: 'variable' },
+                    { text: '\n '},
+                    { text: '\n// 4 Kasım 2019: Ve yıldızlar, o büyük an için aynı hizaya geldi.', type: 'comment'},
+                    { text: '\nconst ', type: 'keyword' }, { text: 'ourConnection', type: 'variable' }, { text: ' = await Destiny.alignStars(safer, alaska);', type: 'function' },
+                    { text: '\n '},
+                    { text: '\n// O günden sonra hayatta nasıl mutlu olabileceğimi keşfettim.', type: 'comment'},
+                    { text: '\nourConnection.on("happy", () => {', type: 'function'},
+                    { text: '\n  console.log("Hayatımın anlamı oldun.");', type: 'string'},
+                    { text: '\n});', type: 'function'},
+                    { text: '\n '},
+                    { text: '\n// Birlikte sayısız anı biriktirdik, yeni dünyalar keşfettik...', type: 'comment'},
+                    { text: '\nconst ', type: 'keyword' }, { text: 'memories', type: 'variable' }, { text: ' = [', type: 'variable' },
+                    { text: '\n  explore("dağlar", "denizler", "şehirler"),', type: 'string'},
+                    { text: '\n  taste("tüm lezzetler, iyi veya kötü"),', type: 'string'},
+                    { text: '\n  laugh("bazen sebepsizce, sabahlara kadar")', type: 'string'},
+                    { text: '\n];', type: 'variable' },
+                    { text: '\nourConnection.addMemories(memories);', type: 'function' },
+                    { text: '\n '},
+                    { text: '\n// Elbette, her kodda olduğu gibi bizimkinde de hatalar oldu.', type: 'comment'},
+                    { text: '\nourConnection.onError((error) => {', type: 'function'},
+                    { text: '\n  // Ama her hatayı, sevgimizle ve sabrımızla onardık.', type: 'comment'},
+                    { text: '\n  Love.patch(error, { with: ', type: 'variable' }, { text: '"sabır"', type: 'string' }, { text: ', and: ', type: 'variable' }, { text: '"anlayış"', type: 'string' }, { text: ' });', type: 'variable' },
+                    { text: '\n  console.log("Ve her seferinde daha da güçlendik.");', type: 'string'},
+                    { text: '\n});', type: 'function'},
+                    { text: '\n '},
+                    { text: '\n// Sen benim evrenimdeki en parlak yıldızsın, her şeyimsin.', type: 'comment'},
+                    { text: '\nconst ', type: 'keyword'}, {text: 'Everything', type: 'class-name'}, {text: ' = alaska;', type: 'variable'},
+                    { text: '\n '},
+                    { text: '\n// Ve aşkımız, sonsuz bir döngüde çalışmaya devam edecek.', type: 'comment' },
+                    { text: '\nsetInterval(() => {', type: 'function'},
+                    { text: '\n  safer.love(Everything, "unconditionally");', type: 'function'},
+                    { text: '\n  alaska.complete(safer);', type: 'function'},
+                    { text: '\n}, 1);', type: 'variable'},
+                    { text: '\n '},
+                    { text: '\n// İmza: Kalbinin en sadık programcısı, Safer.', type: 'comment' },
+                ];
+                await typeLines(codeLines, container);
+                nextStepButton.classList.add('visible');
+            }
+            
+            async function typeLines(lines, element) {
+                let currentLineEl = document.createElement('div');
+                currentLineEl.className = 'code-line';
+                element.appendChild(currentLineEl);
+
+                for (const segment of lines) {
+                    if (segment.text.startsWith('\n')) {
+                        currentLineEl = document.createElement('div');
+                        currentLineEl.className = 'code-line';
+                        element.appendChild(currentLineEl);
+                        segment.text = segment.text.substring(1);
+                    }
+                    await typeSegment(segment.text, segment.type, currentLineEl);
+                    element.scrollTop = element.scrollHeight;
+                }
+            }
+
+            function typeSegment(text, type, element) {
+                return new Promise(resolve => {
+                    let i = 0;
+                    const span = document.createElement('span');
+                    span.className = type;
+                    element.appendChild(span);
+                    const interval = setInterval(() => {
+                        if (i < text.length) {
+                            span.innerHTML += text.charAt(i).replace(/ /g, ' ');
+                            i++;
+                        } else {
+                            clearInterval(interval);
+                            resolve();
+                        }
+                    }, 40); 
+                });
+            }
+
+            nextStepButton.addEventListener('click', () => {
+                switchScreen(codeScreen, memoryScreen);
+                startMemoryLane();
+            });
+            
+            function startMemoryLane() {
+                const constellationContainer = document.getElementById('constellation-container');
+                const memories = [
+                     { text: "İlk 'Merhaba'...", image: "https://i.imgur.com/UV7zDwL.jpeg" },
+                     { text: "Coronadan korunurken", image: "https://i.imgur.com/HVRCmOv.jpeg" },
+                     { text: "Beni yerken", image: "https://i.imgur.com/VI7ftcN.jpeg" },
+                     { text: "Ucuz ve Lezzetli", image: "https://i.imgur.com/szMfCxB.jpeg" },
+                     { text: "En sevdiğin hediye", image: "https://i.imgur.com/gGldUyG.jpeg" },
+                     { text: "Komik bir an", image: "https://i.imgur.com/7Npsxhy.jpeg" },
+                     { text: "Kavuştuğumuz ilk an", image: "https://i.imgur.com/IZDgia6.jpeg" },
+                     { text: "Beşiktaş güzeli", image: "https://i.imgur.com/uGeTJZ9.jpeg" },
+                     { text: "İlk birlikte doğum günün", image: "https://i.imgur.com/VWP7U57.jpeg" },
+                     { text: "Bana verdiğin güzel hediye", image: "https://i.imgur.com/05kl5aV.jpeg" },
+                     { text: "Sana pastanı keserken o sırada sen", image: "https://i.imgur.com/Rw6NwoR.jpeg" },
+                     { text: "Tavşandan daha tatlı olmak'", image: "https://i.imgur.com/nsWdzWy.jpeg" },
+                     { text: "Öpmeye doyamadığım zamanlar", image: "https://i.imgur.com/jhVlvgC.jpeg" },
+                ];
+                
+                const placedConstellations = [];
+                const minDistance = 20;
+
+                function isTooClose(newPos) {
+                    for (const pos of placedConstellations) {
+                        const dx = pos.x - newPos.x;
+                        const dy = pos.y - newPos.y;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        if (distance < minDistance) {
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+
+                let delay = 500;
+                memories.forEach((memory) => {
+                    setTimeout(() => {
+                        let position;
+                        let attempts = 0;
+                        do {
+                            position = {
+                                x: Math.random() * 80 + 10,
+                                y: Math.random() * 50 + 25
+                            };
+                            attempts++;
+                        } while (isTooClose(position) && attempts < 100);
+
+                        placedConstellations.push(position);
+
+                        const constellation = document.createElement('div');
+                        constellation.className = 'constellation';
+                        constellation.style.top = `${position.y}%`;
+                        constellation.style.left = `${position.x}%`;
+                        constellation.style.animationDelay = `${Math.random() * 8}s`;
+
+                        const star = document.createElement('div');
+                        star.className = 'star';
+                        constellation.appendChild(star);
+                        
+                        const popup = document.createElement('div');
+                        popup.className = 'memory-popup';
+                        
+                        const img = document.createElement('img');
+                        img.className = 'memory-image';
+                        img.src = memory.image;
+                        img.onerror = () => { img.src = "https://placehold.co/150x150/ff0000/FFFFFF?text=Hata"; };
+
+                        const text = document.createElement('div');
+                        text.className = 'memory-text';
+                        text.textContent = memory.text;
+
+                        popup.appendChild(img);
+                        popup.appendChild(text);
+                        constellation.appendChild(popup);
+
+                        constellation.addEventListener('mouseenter', () => {
+                            constellation.classList.add('hovered');
+                        });
+                        constellation.addEventListener('mouseleave', () => {
+                            constellation.classList.remove('hovered');
+                        });
+                        
+                        constellationContainer.appendChild(constellation);
+                        
+                        setTimeout(() => constellation.classList.add('visible'), 100);
+
+                    }, delay);
+                    delay += 300;
+                });
+                
+                for (let i = 0; i < 5; i++) {
+                    createShootingStar();
+                }
+
+                setInterval(createShootingStar, 1500);
+
+                setTimeout(() => {
+                     finalStepButton.classList.add('visible');
+                }, delay + 500);
+            }
+            
+            function createShootingStar() {
+                const container = document.getElementById('shooting-stars-container');
+                if(!container) return;
+                const shootingStar = document.createElement('div');
+                shootingStar.classList.add('shooting-star');
+                shootingStar.style.top = `${Math.random() * 100}%`;
+                shootingStar.style.left = `-${Math.random() * 50}%`;
+                const duration = Math.random() * 2 + 3;
+                shootingStar.style.animationDuration = `${duration}s, ${duration}s`;
+                shootingStar.style.animationDelay = `${Math.random() * 5}s`;
+                container.appendChild(shootingStar);
+                
+                 setTimeout(() => {
+                    shootingStar.remove();
+                }, (duration + parseFloat(shootingStar.style.animationDelay)) * 1000);
+            }
+
+            finalStepButton.addEventListener('click', () => {
+                document.body.style.backgroundColor = '#1a0208';
+                switchScreen(memoryScreen, gardenScreen);
+                startGarden();
+            });
+
+            function startGarden() {
+                const canvas = document.getElementById('garden-canvas');
+                const ctx = canvas.getContext('2d');
+                
+                function resizeCanvas() {
+                    canvas.width = window.innerWidth;
+                    canvas.height = window.innerHeight;
+                }
+                window.addEventListener('resize', resizeCanvas);
+                resizeCanvas();
+
+                let elements = [
+                    ...Array.from({ length: 150 }, () => new Heart()),
+                    ...Array.from({ length: 50 }, () => new Star())
+                ];
+
+                function Heart() {
+                    this.x = Math.random() * canvas.width;
+                    this.y = canvas.height + Math.random() * canvas.height;
+                    this.size = Math.random() * 20 + 5;
+                    this.speedY = Math.random() * 2 + 1;
+                    this.opacity = Math.random() * 0.5 + 0.2;
+                    this.color = `hsl(${Math.random() * 20 + 330}, 100%, ${Math.random() * 30 + 60}%)`;
+                    
+                    this.update = function() {
+                        this.y -= this.speedY;
+                        if (this.y < -this.size) {
+                            this.y = canvas.height + this.size;
+                            this.x = Math.random() * canvas.width;
+                        }
+                    };
+                    
+                    this.draw = function() {
+                        ctx.save();
+                        ctx.globalAlpha = this.opacity;
+                        ctx.fillStyle = this.color;
+                        ctx.shadowColor = this.color;
+                        ctx.shadowBlur = 15;
+                        ctx.beginPath();
+                        const topCurveHeight = this.size * 0.3;
+                        ctx.moveTo(this.x, this.y + topCurveHeight);
+                        ctx.bezierCurveTo(this.x, this.y, this.x - this.size / 2, this.y, this.x - this.size / 2, this.y + topCurveHeight);
+                        ctx.bezierCurveTo(this.x - this.size / 2, this.y + (this.size + topCurveHeight) / 2, this.x, this.y + this.size, this.x, this.y + this.size);
+                        ctx.bezierCurveTo(this.x, this.y + this.size, this.x + this.size / 2, this.y + (this.size + topCurveHeight) / 2, this.x + this.size / 2, this.y + topCurveHeight);
+                        ctx.bezierCurveTo(this.x + this.size / 2, this.y, this.x, this.y, this.x, this.y + topCurveHeight);
+                        ctx.closePath();
+                        ctx.fill();
+                        ctx.restore();
+                    };
+                }
+
+                function Star() {
+                    this.x = Math.random() * canvas.width;
+                    this.y = canvas.height + Math.random() * canvas.height;
+                    this.size = Math.random() * 2 + 1;
+                    this.speedY = Math.random() * 1.5 + 0.5;
+                    this.opacity = Math.random() * 0.7 + 0.3;
+                    
+                    this.update = function() {
+                        this.y -= this.speedY;
+                        if (this.y < -this.size) {
+                            this.y = canvas.height + this.size;
+                            this.x = Math.random() * canvas.width;
+                        }
+                    };
+
+                    this.draw = function() {
+                        ctx.save();
+                        ctx.globalAlpha = this.opacity;
+                        ctx.fillStyle = 'white';
+                        ctx.shadowColor = 'white';
+                        ctx.shadowBlur = 10;
+                        ctx.beginPath();
+                        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                        ctx.fill();
+                        ctx.restore();
+                    };
+                }
+
+                function animate() {
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                    elements.forEach(el => { el.update(); el.draw(); });
+                    requestAnimationFrame(animate);
+                }
+                animate();
+                
+                const finalMessage = document.getElementById('final-message');
+                setTimeout(() => {
+                    finalMessage.classList.add('visible');
+                    futureDreamBtn.style.display = 'inline-block';
+                    startClock();
+                    // Safer'e Sor kutusunu göster
+                    document.getElementById('ask-safer-container').style.display = 'flex';
+                }, 1500);
+            }
+            
+            futureDreamBtn.addEventListener('click', async () => {
+                modalText.innerHTML = '';
+                modalLoader.style.display = 'block';
+                modal.classList.add('visible');
+
+                const prompt = `Lütfen ${storyData.partner1} ve ${storyData.partner2} isimli çiftin geleceği hakkında, sanki bir masaldan fırlamış gibi, kısa, kalpleri ısıtan ve çok romantik bir Türkçe paragraf yaz.`;
+                const result = await callGeminiAPI(prompt);
+
+                modalLoader.style.display = 'none';
+                modalText.textContent = result;
+            });
+
+            modalCloseBtn.addEventListener('click', () => modal.classList.remove('visible'));
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('visible');
+                }
+            });
+            
+            function startClock(){
+                const together = new Date(storyData.meetDate);
+                const clock = document.getElementById('elapseClock');
+                if (!clock) return;
+
+                function updateClock(){
+                    const diff = new Date() - together;
+                    const d = Math.floor(diff / (1000*60*60*24));
+                    const h = Math.floor((diff / (1000*60*60)) % 24);
+                    const m = Math.floor((diff / 1000/60) % 60);
+                    const s = Math.floor((diff / 1000) % 60);
+                    clock.innerHTML = `<span class="digit">${d}</span> gün <span class="digit">${h}</span> saat <span class="digit">${m}</span> dakika <span class="digit">${s}</span> saniye`;
+                }
+                updateClock();
+                setInterval(updateClock, 1000);
+            }
+
+            // Safer'e Sor fonksiyonu
+            const askSaferBtn = document.getElementById('ask-safer-button');
+            const askSaferInput = document.getElementById('ask-safer-input');
+            const askSaferAnswer = document.getElementById('ask-safer-answer');
+            askSaferBtn.addEventListener('click', async () => {
+                const question = askSaferInput.value.trim();
+                if (!question) return;
+                askSaferBtn.disabled = true;
+                askSaferAnswer.style.display = 'block';
+                askSaferAnswer.textContent = 'Yanıtlanıyor...';
+                // Kişisel ve bağlama uygun prompt
+                const prompt = `Aşağıdaki bilgiler ışığında Alaska'nın sorusuna Safer'in ağzından, birinci tekil şahıs (ben) olarak cevap ver:\n- Safer ile Alaska'nın ilişkisi 4 yıl sürdü.\n- Safer, Alaska'yı çok seviyor.\n- 2 senedir ayrılar, üzgün ve hüzünlü.\n- Eski anılarını ve Alaska'yı çok özlüyor.\n- Karşılıksız seviyor, Alaska'dan sadece onu tekrar eskisi gibi sevmesini istiyor.\n- Safer, Alaska'ya biraz kırgın; ayrıldıktan sonra Alaska'nın barışmak için hiç çabalamadığını düşünüyor.\n- Alaska, 18 Ekim 2001 doğumlu, Antalya'da yaşıyor ve diyaliz hemşiresi.\n\nAlaska'nın sorusu: \"${question}\"\n\nLütfen kısa, samimi ve romantik bir Türkçe cevap ver.`;
+                const result = await callGeminiAPI(prompt);
+                askSaferAnswer.textContent = result;
+                askSaferBtn.disabled = false;
+            });
+            // Enter tuşu ile de çalışsın
+            askSaferInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') askSaferBtn.click();
+            });
+
+        });
+    </script>
+</body>
+</html>
