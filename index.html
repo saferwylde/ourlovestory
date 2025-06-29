@@ -443,6 +443,15 @@
                 font-size: 1em;
                 word-break: break-word;
             }
+
+            /* Final mesajı yukarı kaydırma animasyonu */
+            #final-message.shift-up {
+                transform: translateY(-120px) scale(0.95);
+                transition: transform 0.5s cubic-bezier(0.4,0,0.2,1);
+            }
+            #final-message {
+                transition: transform 0.5s cubic-bezier(0.4,0,0.2,1);
+            }
         }
 
         /* iPhone 15 Pro Max özel boyutları için ekstra iyileştirme */
@@ -802,6 +811,17 @@
                         constellation.addEventListener('mouseleave', () => {
                             constellation.classList.remove('hovered');
                         });
+                        // Mobil dokunma desteği
+                        let touchActive = false;
+                        constellation.addEventListener('touchend', (e) => {
+                            e.preventDefault();
+                            touchActive = !touchActive;
+                            if (touchActive) {
+                                constellation.classList.add('hovered');
+                            } else {
+                                constellation.classList.remove('hovered');
+                            }
+                        });
                         
                         constellationContainer.appendChild(constellation);
                         
@@ -987,8 +1007,12 @@
                 askSaferBtn.disabled = true;
                 askSaferAnswer.style.display = 'block';
                 askSaferAnswer.textContent = 'Yanıtlanıyor...';
+                // Mobilde final-message yukarı kaydır
+                if (window.innerWidth <= 768) {
+                    document.getElementById('final-message').classList.add('shift-up');
+                }
                 // Kişisel ve bağlama uygun prompt
-                const prompt = `Aşağıdaki bilgiler ışığında Alaska'nın sorusuna Safer'in ağzından, birinci tekil şahıs (ben) olarak cevap ver:\n- Safer ile Alaska'nın ilişkisi 4 yıl sürdü.\n- Safer, Alaska'yı çok seviyor.\n- 2 senedir ayrılar, üzgün ve hüzünlü.\n- Eski anılarını ve Alaska'yı çok özlüyor.\n- Karşılıksız seviyor, Alaska'dan sadece onu tekrar eskisi gibi sevmesini istiyor.\n- Safer, Alaska'ya biraz kırgın; ayrıldıktan sonra Alaska'nın barışmak için hiç çabalamadığını düşünüyor.\n- Alaska, 18 Ekim 2001 doğumlu, Antalya'da yaşıyor ve diyaliz hemşiresi.\n\nAlaska'nın sorusu: \"${question}\"\n\nLütfen kısa, samimi ve romantik bir Türkçe cevap ver.`;
+                const prompt = `Aşağıda Alaska ve Safer hakkında bazı arka plan bilgileri var. Alaska bir soru soracak. Lütfen Safer'in ağzından, birinci tekil şahıs (ben) olarak, sadece soruyla alakalı olan bilgileri kullanarak kısa, samimi ve romantik bir Türkçe cevap ver.\n\nArka plan bilgileri:\n- Safer ile Alaska'nın ilişkisi 4 yıl sürdü.\n- Safer, Alaska'yı çok seviyor.\n- 2 senedir ayrılar, üzgün ve hüzünlü.\n- Eski anılarını ve Alaska'yı çok özlüyor.\n- Karşılıksız seviyor, Alaska'dan sadece onu tekrar eskisi gibi sevmesini istiyor.\n- Safer, Alaska'ya biraz kırgın; ayrıldıktan sonra Alaska'nın barışmak için hiç çabalamadığını düşünüyor.\n- Alaska, 18 Ekim 2001 doğumlu, Antalya'da yaşıyor ve diyaliz hemşiresi.\n\nAlaska'nın sorusu: \"${question}\"`;
                 const result = await callGeminiAPI(prompt);
                 askSaferAnswer.textContent = result;
                 askSaferBtn.disabled = false;
@@ -997,6 +1021,32 @@
             askSaferInput.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') askSaferBtn.click();
             });
+            // Yanıt kutusu kapanınca final-message eski yerine gelsin
+            askSaferInput.addEventListener('focus', () => {
+                if (window.innerWidth <= 768) {
+                    document.getElementById('final-message').classList.add('shift-up');
+                }
+            });
+            // Yanıt kutusu dışında bir yere tıklanırsa veya input temizlenirse eski yerine gelsin
+            function resetFinalMessageIfNeeded() {
+                if (window.innerWidth <= 768 && askSaferAnswer.style.display === 'none') {
+                    document.getElementById('final-message').classList.remove('shift-up');
+                }
+            }
+            // Yanıt kutusunu kapatmak için input temizlenince veya başka yere tıklanınca
+            askSaferInput.addEventListener('input', () => {
+                if (!askSaferInput.value.trim()) {
+                    askSaferAnswer.style.display = 'none';
+                    resetFinalMessageIfNeeded();
+                }
+            });
+            document.body.addEventListener('click', (e) => {
+                if (window.innerWidth > 768) return;
+                if (!askSaferInput.contains(e.target) && !askSaferBtn.contains(e.target) && !askSaferAnswer.contains(e.target)) {
+                    askSaferAnswer.style.display = 'none';
+                    resetFinalMessageIfNeeded();
+                }
+            }, true);
 
         });
     </script>
