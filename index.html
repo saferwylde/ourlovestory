@@ -390,11 +390,14 @@
                 margin-top: 12vh;
                 text-align: center; /* Ortala */
                 padding: 0 10px; /* Kenarlara yapışmasın */
+                z-index: 2 !important;
+                position: relative;
             }
 
             /* Anı pencerelerinin mobil ekrana sığmasını sağla */
             .constellation .memory-popup {
                 width: 150px; /* Genişliği biraz küçült */
+                z-index: 1002 !important;
             }
             .constellation .memory-image {
                 width: 130px; /* Resmi küçült */
@@ -451,6 +454,20 @@
             }
             #final-message {
                 transition: transform 0.5s cubic-bezier(0.4,0,0.2,1);
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100vw;
+                z-index: 300;
+                background: rgba(26,2,8,0.95);
+                padding-top: 18px;
+                box-sizing: border-box;
+            }
+
+            /* Yanıt kutusu final-message'ın altında başlasın */
+            #ask-safer-container {
+                margin-top: 180px;
+                z-index: 200;
             }
         }
 
