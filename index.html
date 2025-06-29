@@ -80,14 +80,14 @@
         }
 
         /* --- PARÇACIK ANİMASYONU --- */
-        #particle-container, #code-particle-container {
+        #particle-container {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             overflow: hidden;
-            z-index: 1;
+            z-index: 0;
         }
         .particle {
             position: absolute;
@@ -117,6 +117,7 @@
             line-height: 1.7;
             overflow-y: auto;
             border: 1px solid #f0e2e5;
+            z-index: 10;
         }
         
         .code-line { white-space: pre-wrap; }
@@ -132,6 +133,7 @@
             opacity: 0;
             transform: translateY(20px);
             transition: opacity 0.5s ease 0.5s, transform 0.5s ease 0.5s;
+            z-index: 10;
         }
 
         #next-step-button.visible {
@@ -155,8 +157,7 @@
             text-shadow: 0 0 15px var(--primary-color);
             margin-top: 8vh;
             margin-bottom: auto;
-            z-index: 0 !important;
-            position: relative;
+            z-index: 10;
         }
         #constellation-container {
             position: absolute;
@@ -211,7 +212,7 @@
             border-radius: 8px;
             box-shadow: 0 5px 20px rgba(0,0,0,0.3);
             width: 170px;
-            z-index: 2000 !important;
+            z-index: 30;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -297,15 +298,12 @@
         #garden-screen { background-color: var(--dark-bg); }
         #garden-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
         #final-message {
-            transition: transform 1.5s ease;
-            position: static;
-            width: 100vw;
-            max-width: 100vw;
-            margin: 0 auto;
+            z-index: 10;
             text-align: center;
-            background: none;
-            padding: 18px 0 8px 0;
-            box-sizing: border-box;
+            color: white;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: opacity 1.5s ease, transform 1.5s ease;
         }
         #final-message.visible {
             opacity: 1;
@@ -394,14 +392,11 @@
                 margin-top: 12vh;
                 text-align: center; /* Ortala */
                 padding: 0 10px; /* Kenarlara yapışmasın */
-                z-index: 2 !important;
-                position: relative;
             }
 
             /* Anı pencerelerinin mobil ekrana sığmasını sağla */
             .constellation .memory-popup {
                 width: 150px; /* Genişliği biraz küçült */
-                z-index: 1002 !important;
             }
             .constellation .memory-image {
                 width: 130px; /* Resmi küçült */
@@ -450,32 +445,6 @@
                 font-size: 1em;
                 word-break: break-word;
             }
-
-            /* Final mesajı yukarı kaydırma animasyonu */
-            #final-message.shift-up {
-                transform: translateY(-120px) scale(0.95);
-                transition: transform 0.5s cubic-bezier(0.4,0,0.2,1);
-            }
-            #final-message {
-                transition: transform 0.5s cubic-bezier(0.4,0,0.2,1);
-                position: fixed;
-                top: 0;
-                left: 50%;
-                transform: translateX(-50%);
-                width: auto;
-                max-width: 95vw;
-                z-index: 300;
-                background: rgba(26,2,8,0.95);
-                padding: 18px 8px 8px 8px;
-                box-sizing: border-box;
-                text-align: center;
-            }
-
-            /* Yanıt kutusu final-message'ın altında başlasın */
-            #ask-safer-container {
-                margin-top: 180px;
-                z-index: 200;
-            }
         }
 
         /* iPhone 15 Pro Max özel boyutları için ekstra iyileştirme */
@@ -507,7 +476,6 @@
     </div>
 
     <div id="code-screen" class="screen">
-        <div id="code-particle-container"></div>
         <div id="code-container"></div>
         <button id="next-step-button" class="button">Anı Haritamıza Bakalım</button>
     </div>
@@ -627,10 +595,9 @@
             
             // ... (Script'in geri kalanı öncekiyle aynı, değişiklik yok) ...
 
-            function createParticles(containerId = 'particle-container') {
-                const container = document.getElementById(containerId);
+            function createParticles() {
+                const container = document.getElementById('particle-container');
                 if (!container) return;
-                container.innerHTML = '';
                 for (let i = 0; i < 50; i++) {
                     const particle = document.createElement('div');
                     particle.classList.add('particle');
@@ -644,7 +611,8 @@
                     container.appendChild(particle);
                 }
             }
-            createParticles(); // start-screen
+            createParticles();
+
 
             function switchScreen(from, to) {
                 from.classList.remove('active');
@@ -661,7 +629,6 @@
                 }
                 
                 switchScreen(startScreen, codeScreen);
-                createParticles('code-particle-container');
                 startCodeAnimation();
             });
 
@@ -753,7 +720,6 @@
             }
 
             nextStepButton.addEventListener('click', () => {
-                document.getElementById('code-particle-container').innerHTML = '';
                 switchScreen(codeScreen, memoryScreen);
                 startMemoryLane();
             });
@@ -1034,10 +1000,6 @@
                 askSaferBtn.disabled = true;
                 askSaferAnswer.style.display = 'block';
                 askSaferAnswer.textContent = 'Yanıtlanıyor...';
-                // Mobilde final-message yukarı kaydır
-                if (window.innerWidth <= 768) {
-                    document.getElementById('final-message').classList.add('shift-up');
-                }
                 // Kişisel ve bağlama uygun prompt
                 const prompt = `Aşağıda Alaska ve Safer hakkında bazı arka plan bilgileri var. Alaska bir soru soracak. Lütfen Safer'in ağzından, birinci tekil şahıs (ben) olarak, sadece soruyla alakalı olan bilgileri kullanarak kısa, samimi ve romantik bir Türkçe cevap ver.\n\nArka plan bilgileri:\n- Safer ile Alaska'nın ilişkisi 4 yıl sürdü.\n- Safer, Alaska'yı çok seviyor.\n- 2 senedir ayrılar, üzgün ve hüzünlü.\n- Eski anılarını ve Alaska'yı çok özlüyor.\n- Karşılıksız seviyor, Alaska'dan sadece onu tekrar eskisi gibi sevmesini istiyor.\n- Safer, Alaska'ya biraz kırgın; ayrıldıktan sonra Alaska'nın barışmak için hiç çabalamadığını düşünüyor.\n- Alaska, 18 Ekim 2001 doğumlu, Antalya'da yaşıyor ve diyaliz hemşiresi.\n\nAlaska'nın sorusu: \"${question}\"`;
                 const result = await callGeminiAPI(prompt);
@@ -1048,32 +1010,6 @@
             askSaferInput.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter') askSaferBtn.click();
             });
-            // Yanıt kutusu kapanınca final-message eski yerine gelsin
-            askSaferInput.addEventListener('focus', () => {
-                if (window.innerWidth <= 768) {
-                    document.getElementById('final-message').classList.add('shift-up');
-                }
-            });
-            // Yanıt kutusu dışında bir yere tıklanırsa veya input temizlenirse eski yerine gelsin
-            function resetFinalMessageIfNeeded() {
-                if (window.innerWidth <= 768 && askSaferAnswer.style.display === 'none') {
-                    document.getElementById('final-message').classList.remove('shift-up');
-                }
-            }
-            // Yanıt kutusunu kapatmak için input temizlenince veya başka yere tıklanınca
-            askSaferInput.addEventListener('input', () => {
-                if (!askSaferInput.value.trim()) {
-                    askSaferAnswer.style.display = 'none';
-                    resetFinalMessageIfNeeded();
-                }
-            });
-            document.body.addEventListener('click', (e) => {
-                if (window.innerWidth > 768) return;
-                if (!askSaferInput.contains(e.target) && !askSaferBtn.contains(e.target) && !askSaferAnswer.contains(e.target)) {
-                    askSaferAnswer.style.display = 'none';
-                    resetFinalMessageIfNeeded();
-                }
-            }, true);
 
         });
     </script>
